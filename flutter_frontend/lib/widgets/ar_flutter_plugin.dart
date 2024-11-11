@@ -36,7 +36,6 @@ class ARLocationScreen extends StatelessWidget {
     arSessionManager = sessionManager;
     arObjectManager = objectManager;
 
-    // Configuramos el ARSessionManager
     arSessionManager.onInitialize(
       showFeaturePoints: false,
       showPlanes: true,
@@ -47,24 +46,20 @@ class ARLocationScreen extends StatelessWidget {
     // Configuramos el ARObjectManager
     arObjectManager.onInitialize();
 
-    // Añadimos el marcador en la posición deseada
     addMarkerAtLocation();
   }
 
   void addMarkerAtLocation() async {
-    // Usa la ubicación de la mascota y coloca el marcador en AR
     final position = vector.Vector3(location.latitude, location.longitude, 0);
 
-    // Agrega el marcador como un nodo en la posición deseada
     var node = ARNode(
       type: NodeType.webGLB,
-      uri: "https://model3dlink.glb", // URL del modelo 3D que deseas cargar
+      uri: "https://model3dlink.glb",
       scale: vector.Vector3(0.1, 0.1, 0.1),
       position: position,
       rotation: vector.Vector4(1, 0, 0, 0),
     );
 
-    // Agrega el nodo al ARObjectManager
     bool? didAddNode = await arObjectManager.addNode(node);
     if (didAddNode == true) {
       print("Nodo agregado en AR correctamente");

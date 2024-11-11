@@ -4,7 +4,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/pet_card.dart';
-import '../widgets/ar_flutter_plugin.dart'; // Importa la pantalla AR aquí
+import '../widgets/ar_flutter_plugin.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -154,12 +155,30 @@ class _HomePageState extends State<HomePage>
                     child: Text("Ver en AR"),
                   ),
                 ),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      openGoogleMaps(pet['lastSeen']);
+                    },
+                    child: Text("Abrir en Google Maps"),
+                  ),
+                ),
               ],
             ),
           ),
         );
       },
     );
+  }
+
+  Future<void> openGoogleMaps(LatLng coordinates) async {
+    final googleMapsUrl =
+        "https://www.google.com/maps/search/?api=1&query=${coordinates.latitude},${coordinates.longitude}";
+    if (await canLaunch(googleMapsUrl)) {
+      await launch(googleMapsUrl);
+    } else {
+      throw "No se pudo abrir Google Maps";
+    }
   }
 
   @override
