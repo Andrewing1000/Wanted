@@ -1,6 +1,7 @@
 // lib/views/manager_screen.dart
 import 'package:flutter/material.dart';
 import 'home_page.dart';
+import 'form_page.dart';
 
 class ManagerScreen extends StatefulWidget {
   @override
@@ -14,7 +15,7 @@ class _ManagerScreenState extends State<ManagerScreen> {
   final List<Widget> _pages = [
     HomePage(), // Página de inicio
     Center(child: Text('Guardados')), // Página de Guardados
-    Center(child: Text('Crear Anuncio')), // Página de Crear Anuncio
+    PetFormScreen(), // Página de Crear Anuncio
     Center(
         child:
             Text('Avistamientos Creados')), // Página de Avistamientos Creados

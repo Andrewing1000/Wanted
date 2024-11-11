@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/pet_card.dart';
+import '../widgets/ar_flutter_plugin.dart'; // Importa la pantalla AR aquí
 
 class HomePage extends StatefulWidget {
   @override
@@ -113,8 +113,7 @@ class _HomePageState extends State<HomePage>
                   height: 200,
                   child: FlutterMap(
                     options: MapOptions(
-                      center:
-                          pet['lastSeen'], // Coordenadas de la última ubicación
+                      center: pet['lastSeen'],
                       zoom: 15,
                     ),
                     children: [
@@ -144,9 +143,15 @@ class _HomePageState extends State<HomePage>
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
-                      openGoogleMaps(pet['lastSeen']);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ARLocationScreen(location: pet['lastSeen']),
+                        ),
+                      );
                     },
-                    child: Text("Abrir en Google Maps"),
+                    child: Text("Ver en AR"),
                   ),
                 ),
               ],
@@ -155,16 +160,6 @@ class _HomePageState extends State<HomePage>
         );
       },
     );
-  }
-
-  Future<void> openGoogleMaps(LatLng coordinates) async {
-    final googleMapsUrl =
-        "https://www.google.com/maps/search/?api=1&query=${coordinates.latitude},${coordinates.longitude}";
-    if (await canLaunch(googleMapsUrl)) {
-      await launch(googleMapsUrl);
-    } else {
-      throw "No se pudo abrir Google Maps";
-    }
   }
 
   @override
