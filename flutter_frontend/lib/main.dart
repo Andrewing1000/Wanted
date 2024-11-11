@@ -1,19 +1,21 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
-import 'views/home_page.dart';
+import 'views/manager_screen.dart';
 
 void main() {
-  runApp(FindYourPetApp());
+  runApp(MyApp());
 }
 
-class FindYourPetApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Find You\'re Pet, go!',
       theme: ThemeData(
-        primaryColor: Colors.blueAccent,
+        primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      home: ManagerScreen(),
     );
   }
 }
