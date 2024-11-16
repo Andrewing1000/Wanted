@@ -1,7 +1,8 @@
 // lib/main.dart
 // lib/main.dart
 import 'package:flutter/material.dart';
-import 'views/manager_screen.dart';
+//import 'views/manager_screen.dart';
+import 'Bienvenida.dart';
 import 'Services/RequestHandler.dart';
 
 void main() async {
@@ -10,12 +11,11 @@ void main() async {
   runApp(MyApp());
 }
 
-// Método para comprobar la conexión al servidor
 Future<void> checkServerConnection() async {
   final requestHandler = RequestHandler();
   try {
     final response = await requestHandler.getRequest('health_check');
-    print('Conexión al servidor exitosa: $response');
+
   } catch (e) {
     print('Error al conectar con el servidor: $e');
   }
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: ManagerScreen(),
+      home: WelcomeScreen(),
     );
   }
 }

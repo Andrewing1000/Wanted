@@ -5,7 +5,7 @@ class RequestHandler {
   final String baseUrl;
 
 
-  RequestHandler({this.baseUrl = 'http://localhost:8080/api/schema/'});
+  RequestHandler({this.baseUrl = 'http://localhost:8080/'});
 
   // Método para realizar solicitudes GET
   Future<dynamic> getRequest(String endpoint, {Map<String, String>? params}) async {
