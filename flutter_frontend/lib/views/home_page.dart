@@ -4,7 +4,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/pet_card.dart';
-import '../widgets/ar_flutter_plugin.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
@@ -141,20 +140,7 @@ class _HomePageState extends State<HomePage>
                   ),
                 ),
                 SizedBox(height: 16),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ARLocationScreen(location: pet['lastSeen']),
-                        ),
-                      );
-                    },
-                    child: Text("Ver en AR"),
-                  ),
-                ),
+
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
@@ -172,10 +158,10 @@ class _HomePageState extends State<HomePage>
   }
 
   Future<void> openGoogleMaps(LatLng coordinates) async {
-    final googleMapsUrl =
+    final url =
         "https://www.google.com/maps/search/?api=1&query=${coordinates.latitude},${coordinates.longitude}";
-    if (await canLaunch(googleMapsUrl)) {
-      await launch(googleMapsUrl);
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
       throw "No se pudo abrir Google Maps";
     }
@@ -194,8 +180,8 @@ class _HomePageState extends State<HomePage>
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          const Padding(
+            padding: EdgeInsets.all(16.0),
             child: Text(
               "Anuncios Recientes",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -203,7 +189,7 @@ class _HomePageState extends State<HomePage>
           ),
           Expanded(
             child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 0.75,
               ),
