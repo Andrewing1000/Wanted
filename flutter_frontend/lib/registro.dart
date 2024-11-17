@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mascotas_flutter/login.dart';
-import 'package:mascotas_flutter/model/auth.dart';
+import 'package:mascotas_flutter/Services/auth.dart';
 import 'package:mascotas_flutter/widgets/Logo.dart';
 import 'package:mascotas_flutter/widgets/hyperlink_text.dart';
 import 'widgets/start_button.dart';

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../widgets/text_input_field.dart';
+import '../widgets/form_widgets/image_picker.dart';
+import '../widgets/form_widgets/description_input_field.dart';
+import '../widgets/form_widgets/date_picker.dart';
+import '../widgets/start_button.dart';
 
 class PetFormScreen extends StatefulWidget {
   @override
@@ -8,9 +13,13 @@ class PetFormScreen extends StatefulWidget {
 }
 
 class _PetFormScreenState extends State<PetFormScreen> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _breedController = TextEditingController();
+  final TextEditingController _colorController = TextEditingController();
+  final TextEditingController _speciesController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _descriptionController = TextEditingController();
   DateTime? _selectedDate;
   File? _selectedImage;
 
@@ -30,7 +39,7 @@ class _PetFormScreenState extends State<PetFormScreen> {
 
   Future<void> _pickImage() async {
     final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
@@ -41,125 +50,60 @@ class _PetFormScreenState extends State<PetFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Registro de Mascota")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Campo de texto para el nombre de la mascota
-              Text("Nombre de la Mascota"),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: "Nombre",
+      body: SingleChildScrollView( // Agregado para permitir desplazamiento
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextInputField(
+                  labelText: 'Nombre de la Mascota',
+                  controller: _nameController,
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingresa un nombre';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-
-              // Selector de fecha
-              Text("Fecha de Extravio"),
-              SizedBox(height: 8),
-              InkWell(
-                onTap: () => _selectDate(context),
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.calendar_today),
-                    hintText: 'Selecciona la fecha',
-                  ),
-                  child: Text(
-                    _selectedDate == null
-                        ? 'MM/DD/YYYY'
-                        : '${_selectedDate!.month}/${_selectedDate!.day}/${_selectedDate!.year}',
-                    style: TextStyle(color: Colors.black),
-                  ),
+                SizedBox(height: 16),
+                TextInputField(
+                  labelText: 'Raza',
+                  controller: _breedController,
                 ),
-              ),
-              SizedBox(height: 16),
-
-              // Campo de texto para la descripción
-              Text("Descripción"),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _descriptionController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: "Descripción",
+                SizedBox(height: 16),
+                TextInputField(
+                  labelText: 'Especie',
+                  controller: _speciesController,
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingresa una descripción';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-
-              // Selector de imagen
-              Text("Subir imagen"),
-              SizedBox(height: 8),
-              InkWell(
-                onTap: _pickImage,
-                child: Container(
-                  width: double.infinity,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: _selectedImage == null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.image, color: Colors.grey, size: 50),
-                            SizedBox(height: 8),
-                            Text("Escoger Imagen",
-                                style: TextStyle(color: Colors.grey)),
-                          ],
-                        )
-                      : Image.file(_selectedImage!, fit: BoxFit.cover),
+                SizedBox(height: 16),
+                TextInputField(
+                  labelText: 'Color',
+                  controller: _colorController,
                 ),
-              ),
-              SizedBox(height: 16),
-
-              // Botones de acción
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                    child: Text("Volver"),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        // Lógica para guardar la mascota
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Guardando mascota...')),
-                        );
-                      }
-                    },
-                    child: Text("Guardar"),
-                  ),
-                ],
-              ),
-            ],
+                SizedBox(height: 16),
+                Text("Fecha de Extravio"),
+                SizedBox(height: 8),
+                DatePickerField(
+                  selectedDate: _selectedDate,
+                  onTap: () => _selectDate(context),
+                ),
+                SizedBox(height: 16),
+                DescriptionInputField(
+                  controller: _descriptionController,
+                ),
+                SizedBox(height: 16),
+                Text("Subir Imagen"),
+                SizedBox(height: 8),
+                ImagePickerField(
+                  selectedImage: _selectedImage,
+                  onTap: _pickImage,
+                ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    StartButton(onPressed:(){}, text: 'Guardar'),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

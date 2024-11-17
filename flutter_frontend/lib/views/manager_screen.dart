@@ -1,7 +1,10 @@
-// lib/views/manager_screen.dart
 import 'package:flutter/material.dart';
+import '../login.dart';
+import '../Services/auth.dart';
 import 'home_page.dart';
 import 'form_page.dart';
+import '../widgets/manage_screen_widgets/main_app_bar.dart';
+import '../widgets/manage_screen_widgets/bottom_naviagation_bar.dart';
 
 class ManagerScreen extends StatefulWidget {
   @override
@@ -11,16 +14,22 @@ class ManagerScreen extends StatefulWidget {
 class _ManagerScreenState extends State<ManagerScreen> {
   int _currentIndex = 0;
   PageController _pageController = PageController();
+  final AuthService _authService = AuthService();
+  String? userName;
 
-  final List<Widget> _pages = [
-    HomePage(), // Página de inicio
-    Center(child: Text('Guardados')), // Página de Guardados
-    PetFormScreen(), // Página de Crear Anuncio
-    Center(
-        child:
-            Text('Avistamientos Creados')), // Página de Avistamientos Creados
-    Center(child: Text('Usuario')), // Página de Usuario
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final name = await _authService.getUserName();
+    setState(() {
+      userName = name ?? 'Usuario';
+    });
+  }
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -38,49 +47,36 @@ class _ManagerScreenState extends State<ManagerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Find You\'re Pet, go!'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications),
-            onPressed: () {
-              // Acciones de notificación
-            },
-          ),
-        ],
+      appBar: MainAppBar(
+        title: 'Find You\'re Pet, go!',
+        userName: userName,
+        onLogout: () async {
+          await _authService.logout();
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (_, __, ___) => LoginScreen(),
+              transitionsBuilder: (_, anim, __, child) {
+                return FadeTransition(opacity: anim, child: child);
+              },
+            ),
+          );
+        },
       ),
       body: PageView(
         controller: _pageController,
-        physics: NeverScrollableScrollPhysics(), // Evita el swipe entre páginas
-        children: _pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onItemTapped,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Guardados',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_box),
-            label: 'Crear Anuncio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Avistamientos Creados',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Usuario',
-          ),
+        physics: NeverScrollableScrollPhysics(),
+        children: [
+          HomePage(),
+          Center(child: Text('Guardados')),
+          PetFormScreen(),
+          Center(child: Text('Avistamientos Creados')),
+          Center(child: Text('Usuario')),
         ],
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
+      ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: _currentIndex,
+        onItemTapped: _onItemTapped,
       ),
     );
   }

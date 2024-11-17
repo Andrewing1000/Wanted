@@ -1,7 +1,7 @@
 
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Services/RequestHandler.dart';
+import '../model/RequestHandler.dart';
 
 class AuthService{
   Future<bool> Login(String correo, String contrasenia) async {
@@ -28,6 +28,7 @@ Future<String> registerCreate(String correo,String contrasenia,String nombre, St
   final resquesthandler = RequestHandler();
   try{
     final register = await resquesthandler.postRequest('user/create/',
+
         data:{
           "email": correo,
           "password": contrasenia,
@@ -65,11 +66,24 @@ Future<String> registerCreate(String correo,String contrasenia,String nombre, St
           'user/logout/',
           headers: {'Authorization': 'Token $token'},
         );
-        await prefs.clear(); 
       }
+
+      await prefs.clear(); // Limpiar los datos
     } catch (e) {
       print('Error al cerrar sesión: $e');
     }
+  }
+
+  /// Obtener el nombre del usuario almacenado
+  Future<String?> getUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userName');
+  }
+
+  /// Obtener el token almacenado
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
   }
 
 

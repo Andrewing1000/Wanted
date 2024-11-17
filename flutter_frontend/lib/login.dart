@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:mascotas_flutter/views/manager_screen.dart';
 import 'package:mascotas_flutter/widgets/Logo.dart';
 import 'package:mascotas_flutter/widgets/text_input_password.dart';
-import 'model/auth.dart';
+import 'Services/auth.dart';
 import 'widgets/text_input_field.dart';
 import 'widgets/hyperlink_text.dart';
 import 'widgets/start_button.dart';
-import 'Services/RequestHandler.dart';
 import 'registro.dart';
 
 
@@ -24,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isPasswordVisible=false;
+
 
   @override
   void initState() {
