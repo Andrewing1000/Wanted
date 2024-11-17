@@ -1,18 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mascotas_flutter/widgets/Logo.dart';
 import 'widgets/titles.dart';
 import 'widgets/start_button.dart';
 import 'login.dart';
-
-
-class LogoWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Image.asset(
-      'assets/paw_logo.png',
-      height: 100.0,
-    );
-  }
-}
 
 class WelcomeScreen extends StatelessWidget {
   @override

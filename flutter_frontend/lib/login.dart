@@ -1,18 +1,15 @@
+
+
 import 'package:flutter/material.dart';
+import 'package:mascotas_flutter/widgets/Logo.dart';
+import 'package:mascotas_flutter/widgets/text_input_password.dart';
+import 'model/auth.dart';
 import 'widgets/text_input_field.dart';
 import 'widgets/hyperlink_text.dart';
 import 'widgets/start_button.dart';
+import 'Services/RequestHandler.dart';
+import 'registro.dart';
 
-
-class LogoWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Image.asset(
-      'assets/paw_logo.png',
-      height: 100.0,
-    );
-  }
-}
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -23,6 +20,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _fadeAnimation;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isPasswordVisible=false;
 
   @override
   void initState() {
@@ -48,8 +49,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   @override
   void dispose() {
     _controller.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -94,27 +99,64 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       normalText: '¿No tienes una cuenta? ',
                       linkText: 'Registrarse',
                       onTap: () {
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder: (_, __, ___) => RegisterScreen(),
+                            transitionsBuilder: (_, anim, __, child) {
+                              return FadeTransition(opacity: anim, child: child);
+                            },
+                          ),
+                        );
 
                       },
                     ),
                     SizedBox(height: 20),
                     TextInputField(
-                      labelText: 'Correo',
+                      labelText: 'Ingrese su correo',
                       hintText: 'ejemplo@gmail.com',
+                      controller: _emailController,
                     ),
                     SizedBox(height: 15),
-                    TextInputField(
-                      labelText: 'Contraseña',
-                      isPassword: true,
+
+                    PasswordInputField(controller: _passwordController,labelText: 'Ingrese su contraseña'),
+                    SizedBox(height: 15),
+                    // Botón para iniciar sesión
+                    StartButton(
+                      text: 'Iniciar Sesión',
+                      onPressed: () async {
+                        final correo = _emailController.text.trim();
+                        final contrasenia = _passwordController.text.trim();
+
+
+                        if (correo.isEmpty || contrasenia.isEmpty) {
+                          print(contrasenia);
+                          print(correo);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Por favor, completa todos los campos'),
+                            ),
+                          );
+                          return;
+                        }
+                        var response = await LoginStart(correo, contrasenia);
+                        if (response == false) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Correo o contraseña incorrectos'),
+                            ),
+                          );
+                        }else if(response == true){
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Inicio correcto de sessión.'),
+                            ),
+                          );
+                        }
+                      },
                     ),
-                    SizedBox(height: 10),
-
-                    SizedBox(height: 30),
-                    StartButton(onPressed:(){
-                      print('yup');
-                    }, text: 'Iniciar Sesion',),
                     SizedBox(height: 20),
-
                   ],
                 ),
               ),
@@ -125,3 +167,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     );
   }
 }
+
+
+
+
+

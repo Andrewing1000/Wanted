@@ -1,134 +1,202 @@
 import 'package:flutter/material.dart';
+import 'package:mascotas_flutter/login.dart';
+import 'package:mascotas_flutter/model/auth.dart';
+import 'package:mascotas_flutter/widgets/Logo.dart';
+import 'package:mascotas_flutter/widgets/hyperlink_text.dart';
+import 'widgets/start_button.dart';
+import 'widgets/text_input_field.dart';
+import 'widgets/text_input_password.dart';
 
-void main() {
-  runApp(RegisterApp());
-}
 
-class RegisterApp extends StatelessWidget {
+
+
+class RegisterScreen extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Registro',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: RegisterScreen(), // Cambié RegisterApp() por RegisterScreen()
-    );
-  }
+  _RegisterScreenState createState() => _RegisterScreenState();
 }
 
-class RegisterScreen extends StatelessWidget {
+class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProviderStateMixin {
+  final TextEditingController _nameCon = TextEditingController();
+  final TextEditingController _emailCon = TextEditingController();
+  final TextEditingController _telefono = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _nameCon.dispose();
+    _emailCon.dispose();
+    _password.dispose();
+    _telefono.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFE6F0F3), // Color de fondo
+      backgroundColor: Color(0xFFE6F0F3), // Fondo de la pantalla
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Icono de la pata
-              Icon(
-                Icons.pets,
-                size: 80,
-                color: Colors.purple[200],
-              ),
-              SizedBox(height: 30),
-              // Título de "Registrarse"
-              Text(
-                'Registrarse',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(height: 8),
-              // Texto de "Cree una cuenta para continuar"
-              Text(
-                'Cree una cuenta para continuar!',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
-              ),
-              SizedBox(height: 20),
-              // Campo de Nombre Completo
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Nombre Completo',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-              SizedBox(height: 15),
-              // Campo de Correo
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Correo',
-                  hintText: 'ejemplo@correo.com',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-              SizedBox(height: 15),
-              // Campo de Contraseña
-              TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Escriba su contraseña',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  suffixIcon: Icon(Icons.visibility_off),
-                ),
-              ),
-              SizedBox(height: 30),
-              // Botón de Registrarse
-              ElevatedButton(
-                onPressed: () {
-                  // Acción al presionar Registrarse
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF5C6BC0),
-                  padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Text(
-                  'Registrarse',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-              SizedBox(height: 20),
-              // Texto de inicio de sesión
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '¿Ya tienes una cuenta? ',
-                    style: TextStyle(color: Colors.black54, fontSize: 14),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // Acción al presionar "Iniciar Sesión"
-                    },
-                    child: Text(
-                      'Iniciar Sesión',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Logo
+                    LogoWidget(),
+                    SizedBox(height: 20),
+                    // Texto introductorio
+                    Text(
+                      'Cree una cuenta para continuar!',
                       style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: 16,
+                        color: Colors.black54,
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 20),
+                    // Título principal
+                    Text(
+                      'Registrarse',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                    // Campo de Nombre Completo
+                    TextInputField(
+                      controller: _nameCon,
+                      labelText: 'Nombre Completo',
+                      hintText: '',
+                    ),
+                    SizedBox(height: 15),
+                    // Campo de Correo
+                    TextInputField(
+                      controller: _emailCon,
+                      labelText: 'Correo',
+                      hintText: 'ejemplo@gmail.com',
+                    ),
+                    SizedBox(height: 15),
+                    // Campo de Teléfono
+                    TextInputField(
+                      controller: _telefono,
+                      labelText: 'Teléfono',
+                      hintText: '',
+                    ),
+                    SizedBox(height: 15),
+                    // Campo de Contraseña
+                    PasswordInputField(
+                      controller: _password,
+                      labelText: 'Escriba su contraseña',
+                    ),
+                    SizedBox(height: 30),
+                    // Botón de Registrarse
+                    StartButton(
+                      onPressed: () async {
+                        final correo = _emailCon.text.trim();
+                        final password = _password.text.trim();
+                        final telefono = _telefono.text.trim();
+                        final nombre = _nameCon.text.trim();
+
+                        if (correo.isEmpty || password.isEmpty || telefono.isEmpty || nombre.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Por favor, complete todos los campos'),
+                            ),
+                          );
+                          return;
+                        }
+                        var response = await registerCreate(correo, password, nombre, telefono);
+                        if (response == false) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Error al registrar el usuario'),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Registro exitoso'),
+                            ),
+                          );
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (_, __, ___) => LoginScreen(),
+                              transitionsBuilder: (_, anim, __, child) {
+                                return FadeTransition(opacity: anim, child: child);
+                              },
+                            ),
+                          );
+
+                        }
+                      },
+                      text: 'Registrarse',
+                    ),
+                    SizedBox(height: 20),
+                    // Enlace para iniciar sesión
+                    HyperlinkText(
+                      normalText: '¿Ya tienes una cuenta? ',
+                      linkText: 'Inicia Sesión',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder: (_, __, ___) => LoginScreen(),
+                            transitionsBuilder: (_, anim, __, child) {
+                              return FadeTransition(opacity: anim, child: child);
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
       ),
