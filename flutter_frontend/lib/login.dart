@@ -1,6 +1,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:mascotas_flutter/views/manager_screen.dart';
 import 'package:mascotas_flutter/widgets/Logo.dart';
 import 'package:mascotas_flutter/widgets/text_input_password.dart';
 import 'model/auth.dart';
@@ -140,7 +141,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           );
                           return;
                         }
-                        var response = await LoginStart(correo, contrasenia);
+                        var auth = await AuthService();
+                        var response = await auth.Login(correo,contrasenia);
                         if (response == false) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -148,11 +150,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
                           );
                         }else if(response == true){
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Inicio correcto de sessión.'),
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (_, __, ___) => ManagerScreen(),
+                              transitionsBuilder: (_, anim, __, child) {
+                                return FadeTransition(opacity: anim, child: child);
+                              },
                             ),
                           );
+
                         }
                       },
                     ),

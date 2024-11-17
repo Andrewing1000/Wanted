@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mascotas_flutter/login.dart';
 import 'package:mascotas_flutter/model/auth.dart';
@@ -149,17 +150,14 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                           );
                           return;
                         }
-                        var response = await registerCreate(correo, password, nombre, telefono);
-                        if (response == false) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Error al registrar el usuario'),
-                            ),
-                          );
-                        } else {
+
+                        var Auth = await AuthService();
+                        final register =await Auth.registerCreate(correo, password, nombre, telefono);
+                        if (register == 'Registro') {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Registro exitoso'),
+                              backgroundColor: CupertinoColors.activeGreen,
                             ),
                           );
                           Navigator.push(
@@ -171,6 +169,14 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                               },
                             ),
                           );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(register as String),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+
 
                         }
                       },
