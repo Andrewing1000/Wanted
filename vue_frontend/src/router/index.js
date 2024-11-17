@@ -7,7 +7,7 @@ import HelpPage from '../views/HelpPage.vue';
 import AboutPage from '../views/AboutPage.vue';
 import RegisterPage from '../views/RegisterPage.vue';
 import LoginPage from '../views/LoginPage.vue';
-
+import AdminPage from '../views/AdminPage.vue';
 const routes = [
   { path: '/', name: 'Inicio', component: HomePage },
   { path: '/servicios', name: 'Servicios', component: ServicesPage },
@@ -16,6 +16,7 @@ const routes = [
   { path: '/sobre-nosotros', name: 'Sobre Nosotros', component: AboutPage },
   { path: '/registro', component: RegisterPage },
   { path: '/iniciar-sesion', component: LoginPage },
+  { path: '/admin', component: AdminPage },
 ];
 
 const router = createRouter({
