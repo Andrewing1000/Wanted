@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../Services/User.dart';
-import 'UserMe.dart'; // Pantalla para editar datos
+import 'UserMe.dart'; // Importa la pantalla para editar
 
 class ViewProfileScreen extends StatefulWidget {
-  final VoidCallback onEdit; // Callback para navegar a la pantalla de edición
+  final VoidCallback onEdit; // Callback para alternar a la pantalla de edición
 
   const ViewProfileScreen({required this.onEdit, Key? key}) : super(key: key);
 
@@ -22,12 +22,12 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     _fetchUserData();
   }
 
-  // Obtener los datos del usuario
+  /// Obtener los datos del usuario
   Future<void> _fetchUserData() async {
     try {
       final data = await user.ObtenerData();
       setState(() {
-        userData = Map<String, dynamic>.from(data); // Asegurar formato
+        userData = data;
         isLoading = false;
       });
     } catch (e) {
@@ -108,7 +108,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                             // Botón para editar
                             Center(
                               child: ElevatedButton(
-                                onPressed: widget.onEdit, // Usar el callback
+                                onPressed:
+                                    widget.onEdit, // Cambiar al modo de edición
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blueAccent,
                                   padding: EdgeInsets.symmetric(
@@ -134,7 +135,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  // Widget para construir cada fila de información
+  /// Widget para construir cada fila de información
   Widget _buildInfoRow(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),

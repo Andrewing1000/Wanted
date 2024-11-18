@@ -16,6 +16,7 @@ class ManagerScreen extends StatefulWidget {
 
 class _ManagerScreenState extends State<ManagerScreen> {
   int _currentIndex = 0; // Índice de la página actual
+  bool _isEditingProfile = false; // Bandera para alternar entre vista y edición
   final PageController _pageController =
       PageController(); // Controlador de páginas
   final AuthService _authService = AuthService();
@@ -39,6 +40,15 @@ class _ManagerScreenState extends State<ManagerScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
+      _isEditingProfile =
+          false; // Salir del modo de edición al cambiar de página
+    });
+  }
+
+  /// Alternar entre modo de vista y edición
+  void _toggleEditMode() {
+    setState(() {
+      _isEditingProfile = !_isEditingProfile;
     });
   }
 
@@ -69,8 +79,9 @@ class _ManagerScreenState extends State<ManagerScreen> {
           WidgetsTestScreen(),
           PetFormScreen(),
           Center(child: Text('Avistamientos Creados')),
-          ViewProfileScreen(
-              onEdit: _navigateToEditScreen), // Cambia para usar `onEdit`
+          _isEditingProfile
+              ? ForMeScreen() // Pantalla de edición
+              : ViewProfileScreen(onEdit: _toggleEditMode), // Pantalla de vista
         ],
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
@@ -78,18 +89,5 @@ class _ManagerScreenState extends State<ManagerScreen> {
         onItemTapped: _onItemTapped,
       ),
     );
-  }
-
-  /// Navegar a la pantalla de edición desde `ViewProfileScreen`
-  void _navigateToEditScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ForMeScreen(),
-      ),
-    ).then((_) {
-      // Al regresar de la pantalla de edición, recargar el nombre del usuario
-      _loadUserName();
-    });
   }
 }
