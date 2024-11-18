@@ -6,7 +6,8 @@ import 'form_page.dart';
 import '../widgets/manage_screen_widgets/main_app_bar.dart';
 import '../widgets/manage_screen_widgets/bottom_naviagation_bar.dart';
 import 'testing/test_widgets.dart';
-import 'UserMe.dart';
+import 'UserMe/VIewProfileScreen.dart';
+import 'UserMe/UserMe.dart'; // Pantalla para editar datos
 
 class ManagerScreen extends StatefulWidget {
   @override
@@ -14,8 +15,9 @@ class ManagerScreen extends StatefulWidget {
 }
 
 class _ManagerScreenState extends State<ManagerScreen> {
-  int _currentIndex = 0;
-  PageController _pageController = PageController();
+  int _currentIndex = 0; // Índice de la página actual
+  final PageController _pageController =
+      PageController(); // Controlador de páginas
   final AuthService _authService = AuthService();
   String? userName;
 
@@ -25,6 +27,7 @@ class _ManagerScreenState extends State<ManagerScreen> {
     _loadUserName();
   }
 
+  /// Cargar el nombre del usuario
   Future<void> _loadUserName() async {
     final name = await _authService.getUserName();
     setState(() {
@@ -32,10 +35,10 @@ class _ManagerScreenState extends State<ManagerScreen> {
     });
   }
 
+  /// Cambiar a la página seleccionada
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
-      _pageController.jumpToPage(index);
     });
   }
 
@@ -53,26 +56,21 @@ class _ManagerScreenState extends State<ManagerScreen> {
         userName: userName,
         onLogout: () async {
           await _authService.logout();
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
-            PageRouteBuilder(
-              pageBuilder: (_, __, ___) => LoginScreen(),
-              transitionsBuilder: (_, anim, __, child) {
-                return FadeTransition(opacity: anim, child: child);
-              },
-            ),
+            MaterialPageRoute(builder: (context) => LoginScreen()),
           );
         },
       ),
-      body: PageView(
-        controller: _pageController,
-        physics: NeverScrollableScrollPhysics(),
+      body: IndexedStack(
+        index: _currentIndex,
         children: [
           HomePage(),
           WidgetsTestScreen(),
           PetFormScreen(),
           Center(child: Text('Avistamientos Creados')),
-          ForMeScreen(),
+          ViewProfileScreen(
+              onEdit: _navigateToEditScreen), // Cambia para usar `onEdit`
         ],
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
@@ -80,5 +78,18 @@ class _ManagerScreenState extends State<ManagerScreen> {
         onItemTapped: _onItemTapped,
       ),
     );
+  }
+
+  /// Navegar a la pantalla de edición desde `ViewProfileScreen`
+  void _navigateToEditScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ForMeScreen(),
+      ),
+    ).then((_) {
+      // Al regresar de la pantalla de edición, recargar el nombre del usuario
+      _loadUserName();
+    });
   }
 }

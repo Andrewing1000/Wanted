@@ -8,14 +8,21 @@ import '../Services/User.dart';
 class UserMe {
   final RequestHandler Request = RequestHandler();
   final AuthService token = AuthService();
-  Future<String> ObtenerData() async {
+  Future<Map<String, dynamic>> ObtenerData() async {
     try {
-      final tokenUser = token.getToken();
-      Request.getRequest('user/manage',
-          headers: {'Authorization': 'Token $tokenUser'});
-      return 'Done';
+      final tokenUser = await token.getToken();
+      final response = await Request.getRequest('user/me', headers: {
+        'Authorization': 'Token $tokenUser',
+      });
+
+      if (response is Map<String, dynamic>) {
+        return response;
+      } else {
+        throw Exception('Formato de respuesta inválido');
+      }
     } catch (e) {
-      return e.toString();
+      print('Error al obtener los datos del usuario: $e');
+      throw Exception('Error al obtener los datos del usuario');
     }
   }
 
