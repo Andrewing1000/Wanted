@@ -8,6 +8,7 @@ import AboutPage from '../views/AboutPage.vue';
 import RegisterPage from '../views/RegisterPage.vue';
 import LoginPage from '../views/LoginPage.vue';
 import AdminPage from '../views/AdminPage.vue';
+import PruebaPage from '../views/PruebaPage.vue';
 const routes = [
   { path: '/', name: 'Inicio', component: HomePage },
   { path: '/servicios', name: 'Servicios', component: ServicesPage },
@@ -17,6 +18,7 @@ const routes = [
   { path: '/registro', component: RegisterPage },
   { path: '/iniciar-sesion', component: LoginPage },
   { path: '/admin', component: AdminPage },
+  { path: '/prueba', component: PruebaPage },
 ];
 
 const router = createRouter({
