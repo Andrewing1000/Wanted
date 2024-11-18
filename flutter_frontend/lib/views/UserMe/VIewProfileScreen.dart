@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../Services/User.dart';
+import "../../widgets/start_button.dart";
 import 'UserMe.dart'; // Importa la pantalla para editar
 
 class ViewProfileScreen extends StatefulWidget {
@@ -107,21 +108,10 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                             SizedBox(height: 20),
                             // Botón para editar
                             Center(
-                              child: ElevatedButton(
+                              child: StartButton(
+                                text: 'Editar Usuario',
                                 onPressed:
                                     widget.onEdit, // Cambiar al modo de edición
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blueAccent,
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 50, vertical: 15),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Editar',
-                                  style: TextStyle(fontSize: 16),
-                                ),
                               ),
                             ),
                           ],

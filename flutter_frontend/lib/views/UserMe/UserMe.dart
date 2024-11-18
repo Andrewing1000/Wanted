@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mascotas_flutter/views/manager_screen.dart';
 import '../../widgets/text_input_field.dart';
 import '../../widgets/text_input_password.dart';
 import '../../widgets/start_button.dart';
@@ -114,7 +115,17 @@ class _ForMeScreenState extends State<ForMeScreen> {
                               final telefono = _numeroController.text.trim();
                               final nombre = _nameController.text.trim();
                               final UserMe user = UserMe();
-                              if (confirmacion == contrasenia) {
+                              if (correo.isEmpty ||
+                                  contrasenia.isEmpty ||
+                                  confirmacion.isEmpty ||
+                                  telefono.isEmpty ||
+                                  nombre.isEmpty) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content: Text('Llene todos los datos'),
+                                  backgroundColor: Colors.red,
+                                ));
+                              } else if (confirmacion == contrasenia) {
                                 user.GuardarCambios(
                                   correo,
                                   contrasenia,
@@ -127,6 +138,17 @@ class _ForMeScreenState extends State<ForMeScreen> {
                                       Text('Datos actualizados correctamente'),
                                   backgroundColor: Colors.green,
                                 ));
+                                Navigator.push(
+                                  context,
+                                  PageRouteBuilder(
+                                    pageBuilder: (_, __, ___) =>
+                                        ManagerScreen(),
+                                    transitionsBuilder: (_, anim, __, child) {
+                                      return FadeTransition(
+                                          opacity: anim, child: child);
+                                    },
+                                  ),
+                                );
                               } else {
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(SnackBar(
