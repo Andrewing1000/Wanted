@@ -8,7 +8,7 @@ import '../Services/User.dart';
 class UserMe {
   final RequestHandler Request = RequestHandler();
   final AuthService token = AuthService();
-  Future<String> getUserName() async {
+  Future<String> ObtenerData() async {
     try {
       final tokenUser = token.getToken();
       Request.getRequest('user/manage',
@@ -19,12 +19,19 @@ class UserMe {
     }
   }
 
-  Future<String> ObtenerData(
-      String email, String password, String nombre, bool Activo) async {
+  Future<String> GuardarCambios(
+      String email, String password, String nombre, String numero) async {
     try {
       final tokenUser = token.getToken();
-      Request.putRequest('user/manage/',
-          headers: {'Authorization': 'Token $tokenUser'});
+      Request.patchRequest('user/me/', data: {
+        "email": email,
+        "password": password,
+        "name": nombre,
+        "phone_number": numero,
+        "is_active": true,
+      }, headers: {
+        'Authorization': '$tokenUser'
+      });
       return 'Done';
     } catch (e) {
       return e.toString();

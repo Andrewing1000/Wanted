@@ -1,112 +1,93 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../widgets/text_input_field.dart';
+import '../widgets/text_input_password.dart';
+import '../widgets/start_button.dart';
+import '../Services/User.dart';
 
-class UserMe extends StatefulWidget {
+class ForMeScreen extends StatefulWidget {
   @override
-  _UserMeState createState() => _UserMeState();
+  _ForMeScreenState createState() => _ForMeScreenState();
 }
 
-class _UserMeState extends State<UserMe> {
-  Map<String, dynamic> userData = {
-    "email": "",
-    "name": "",
-    "phone_number": "",
-    "is_active": true,
-  };
+class _ForMeScreenState extends State<ForMeScreen> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _correoController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _ConfirmPasswordController =
+      TextEditingController();
+  final TextEditingController _numeroController = TextEditingController();
 
-  String token = "your-authentication-token";
-
-  Future<void> fetchUserData() async {
-    try {
-      final response = await http.get(
-        Uri.parse('http://localhost:8000/api/user/me/'),
-        headers: {'Authorization': 'Token $token'},
-      );
-      if (response.statusCode == 200) {
-        setState(() {
-          userData = json.decode(response.body);
-        });
-      } else {
-        throw Exception('Failed to load user data');
-      }
-    } catch (error) {
-      print('Error fetching user data: $error');
-    }
-  }
-
-  Future<void> updateUserData() async {
-    try {
-      final response = await http.put(
-        Uri.parse('http://localhost:8000/api/user/me/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Token $token',
-        },
-        body: json.encode(userData),
-      );
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Datos actualizados')),
-        );
-      } else {
-        throw Exception('Actualizacion fallida');
-      }
-    } catch (error) {
-      print('Error al actualizar: $error');
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchUserData();
-  }
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('User Profile'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              decoration: InputDecoration(labelText: 'Name'),
-              onChanged: (value) => userData['name'] = value,
-              controller: TextEditingController(text: userData['name']),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextInputField(
+                  labelText: 'Nombre',
+                  controller: _nameController,
+                ),
+                SizedBox(height: 16),
+                TextInputField(
+                  labelText: 'Correo',
+                  controller: _correoController,
+                ),
+                SizedBox(height: 16),
+                TextInputField(
+                  labelText: 'Numero',
+                  controller: _numeroController,
+                ),
+                SizedBox(height: 16),
+                PasswordInputField(
+                  labelText: 'Contraseña',
+                  controller: _passwordController,
+                ),
+                SizedBox(height: 16),
+                PasswordInputField(
+                  labelText: 'Confirmacion Contraseña',
+                  controller: _ConfirmPasswordController,
+                ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    StartButton(
+                      onPressed: () async {
+                        final correo = _correoController.text.trim();
+                        final contrasenia = _passwordController.text.trim();
+                        final confirmacion =
+                            _ConfirmPasswordController.text.trim();
+                        final telefono = _numeroController.text.trim();
+                        final nombre = _nameController.text.trim();
+                        final UserMe user = UserMe();
+                        if (confirmacion == contrasenia) {
+                          user.GuardarCambios(
+                            correo,
+                            contrasenia,
+                            telefono,
+                            nombre,
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text('Las contraseñas no conciden'),
+                            backgroundColor: Colors.red,
+                          ));
+                        }
+                      },
+                      text: 'Guardar',
+                    ),
+                  ],
+                ),
+              ],
             ),
-            TextField(
-              decoration: InputDecoration(labelText: 'Email'),
-              onChanged: (value) => userData['email'] = value,
-              controller: TextEditingController(text: userData['email']),
-            ),
-            TextField(
-              decoration: InputDecoration(labelText: 'Phone Number'),
-              keyboardType: TextInputType.phone,
-              onChanged: (value) => userData['phone_number'] = value,
-              controller: TextEditingController(text: userData['phone_number']),
-            ),
-            SwitchListTile(
-              title: Text('Active'),
-              value: userData['is_active'] ?? false,
-              onChanged: (value) => setState(() {
-                userData['is_active'] = value;
-              }),
-            ),
-            ElevatedButton(
-              onPressed: updateUserData,
-              child: Text('Save Changes'),
-            ),
-          ],
+          ),
         ),
       ),
     );

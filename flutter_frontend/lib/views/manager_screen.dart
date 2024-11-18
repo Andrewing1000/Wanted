@@ -6,6 +6,7 @@ import 'form_page.dart';
 import '../widgets/manage_screen_widgets/main_app_bar.dart';
 import '../widgets/manage_screen_widgets/bottom_naviagation_bar.dart';
 import 'testing/test_widgets.dart';
+import 'UserMe.dart';
 
 class ManagerScreen extends StatefulWidget {
   @override
@@ -30,7 +31,6 @@ class _ManagerScreenState extends State<ManagerScreen> {
       userName = name ?? 'Usuario';
     });
   }
-
 
   void _onItemTapped(int index) {
     setState(() {
@@ -72,7 +72,7 @@ class _ManagerScreenState extends State<ManagerScreen> {
           WidgetsTestScreen(),
           PetFormScreen(),
           Center(child: Text('Avistamientos Creados')),
-          Center(child: Text('Usuario')),
+          ForMeScreen(),
         ],
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
