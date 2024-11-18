@@ -17,22 +17,22 @@ class LiveMap extends StatefulWidget {
 }
 
 class _LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
-  LatLng _currentPosition = LatLng(-16.5038, -68.1193);
-  final MapController _mapController = MapController();
-  late AnimationController _heartbeatController;
-  late Animation<double> _heartbeatAnimation;
+  LatLng _currentPosition = LatLng(-16.5038, -68.1193); // Coordenadas iniciales (La Paz)
+  final MapController _mapController = MapController(); // Controlador del mapa
+  late AnimationController _heartbeatController; // Controlador para la animación de latidos
+  late Animation<double> _heartbeatAnimation; // Animación de escala para el ícono
 
   @override
   void initState() {
     super.initState();
 
-
+    // Configurar el controlador y la animación de latidos
     _heartbeatController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 800), // Duración de cada latido
       vsync: this,
-    )..repeat(reverse: true);
+    )..repeat(reverse: true); // Animación de ida y vuelta
 
-    _heartbeatAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
+    _heartbeatAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(parent: _heartbeatController, curve: Curves.easeInOut),
     );
 
@@ -41,17 +41,17 @@ class _LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
       setState(() {
         _currentPosition = newPosition;
       });
-      _animatedMapMove(newPosition, _mapController.zoom);
+      _animatedMapMove(newPosition, _mapController.zoom); // Transición suave
     });
   }
 
   @override
   void dispose() {
-    _heartbeatController.dispose();
+    _heartbeatController.dispose(); // Liberar recursos
     super.dispose();
   }
 
-
+  /// Transición suave del mapa
   void _animatedMapMove(LatLng destLocation, double destZoom) {
     final latTween = Tween<double>(
       begin: _mapController.center.latitude,
@@ -109,7 +109,7 @@ class _LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
               width: 80,
               height: 80,
               builder: (context) {
-
+                // Construir marcador personalizado si se proporciona, de lo contrario usar un marcador predeterminado
                 return widget.markerBuilder != null
                     ? widget.markerBuilder!(context, _currentPosition)
                     : AnimatedBuilder(
@@ -117,23 +117,10 @@ class _LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
                   builder: (context, child) {
                     return Transform.scale(
                       scale: _heartbeatAnimation.value,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.red,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.red.withOpacity(0.5),
-                              blurRadius: _heartbeatAnimation.value * 8,
-                              spreadRadius: _heartbeatAnimation.value * 2,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.location_on,
-                          color: Colors.white,
-                          size: 40,
-                        ),
+                      child: Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 40,
                       ),
                     );
                   },
