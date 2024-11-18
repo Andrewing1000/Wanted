@@ -4,14 +4,26 @@ import 'package:http/http.dart' as http;
 class RequestHandler {
   final String baseUrl;
 
-  RequestHandler({this.baseUrl = 'http://localhost:8080/'});
+  RequestHandler({this.baseUrl = 'http://localhost:8000/api'});
+
+
+  static const String token = "your-authentication-token";
+
+
+  Map<String, String> getHeaders({Map<String, String>? customHeaders}) {
+    return {
+      "Authorization": "Token $token",
+      "Content-Type": "application/json",
+      ...?customHeaders,
+    };
+  }
 
   // Método para realizar solicitudes GET
   Future<dynamic> getRequest(String endpoint,
       {Map<String, String>? params, Map<String, String>? headers}) async {
     try {
-      final uri = Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
-      final response = await http.get(uri, headers: headers);
+      final uri = Uri.parse('$baseUrl/$endpoint').replace(queryParameters: params);
+      final response = await http.get(uri, headers: getHeaders(customHeaders: headers));
       return _handleResponse(response);
     } catch (e) {
       _handleError(e);
@@ -22,14 +34,11 @@ class RequestHandler {
   Future<dynamic> postRequest(String endpoint,
       {Map<String, dynamic>? data, Map<String, String>? params, Map<String, String>? headers}) async {
     try {
-      final uri = Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
+      final uri = Uri.parse('$baseUrl/$endpoint').replace(queryParameters: params);
       final response = await http.post(
         uri,
         body: jsonEncode(data),
-        headers: {
-          'Content-Type': 'application/json',
-          ...?headers,
-        },
+        headers: getHeaders(customHeaders: headers),
       );
       return _handleResponse(response);
     } catch (e) {
@@ -41,14 +50,11 @@ class RequestHandler {
   Future<dynamic> putRequest(String endpoint,
       {Map<String, dynamic>? data, Map<String, String>? params, Map<String, String>? headers}) async {
     try {
-      final uri = Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
+      final uri = Uri.parse('$baseUrl/$endpoint').replace(queryParameters: params);
       final response = await http.put(
         uri,
         body: jsonEncode(data),
-        headers: {
-          'Content-Type': 'application/json',
-          ...?headers,
-        },
+        headers: getHeaders(customHeaders: headers),
       );
       return _handleResponse(response);
     } catch (e) {
@@ -60,8 +66,8 @@ class RequestHandler {
   Future<dynamic> deleteRequest(String endpoint,
       {Map<String, String>? params, Map<String, String>? headers}) async {
     try {
-      final uri = Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
-      final response = await http.delete(uri, headers: headers);
+      final uri = Uri.parse('$baseUrl/$endpoint').replace(queryParameters: params);
+      final response = await http.delete(uri, headers: getHeaders(customHeaders: headers));
       return _handleResponse(response);
     } catch (e) {
       _handleError(e);
@@ -72,14 +78,11 @@ class RequestHandler {
   Future<dynamic> patchRequest(String endpoint,
       {Map<String, dynamic>? data, Map<String, String>? params, Map<String, String>? headers}) async {
     try {
-      final uri = Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
+      final uri = Uri.parse('$baseUrl/$endpoint').replace(queryParameters: params);
       final response = await http.patch(
         uri,
         body: jsonEncode(data),
-        headers: {
-          'Content-Type': 'application/json',
-          ...?headers,
-        },
+        headers: getHeaders(customHeaders: headers),
       );
       return _handleResponse(response);
     } catch (e) {
