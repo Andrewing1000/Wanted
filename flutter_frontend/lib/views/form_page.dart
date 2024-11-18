@@ -1,11 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import '../widgets/text_input_field.dart';
+import 'package:latlong2/latlong.dart';
+import 'dart:typed_data'; // Para Uint8List
 import '../widgets/form_widgets/image_picker.dart';
+import '../widgets/form_widgets/location_picker_field.dart';
+import '../widgets/text_input_field.dart';
 import '../widgets/form_widgets/description_input_field.dart';
 import '../widgets/form_widgets/date_picker.dart';
 import '../widgets/start_button.dart';
+import '../Services/Pet_Service.dart';
 
 class PetFormScreen extends StatefulWidget {
   @override
@@ -18,10 +22,12 @@ class _PetFormScreenState extends State<PetFormScreen> {
   final TextEditingController _colorController = TextEditingController();
   final TextEditingController _speciesController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _rewardController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
   DateTime? _selectedDate;
-  File? _selectedImage;
+  Uint8List? _selectedImage;
+  LatLng? _selectedLocation;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -37,20 +43,23 @@ class _PetFormScreenState extends State<PetFormScreen> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile =
-    await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
-    }
+  void _onImagePicked(Uint8List? imageBytes) {
+    setState(() {
+      _selectedImage = imageBytes;
+    });
   }
+
+  void _onLocationPicked(LatLng location) {
+    setState(() {
+      _selectedLocation = location;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView( // Agregado para permitir desplazamiento
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
@@ -78,6 +87,11 @@ class _PetFormScreenState extends State<PetFormScreen> {
                   controller: _colorController,
                 ),
                 SizedBox(height: 16),
+                TextInputField(
+                  labelText: 'Recompensa',
+                  controller: _rewardController,
+                ),
+                SizedBox(height: 16),
                 Text("Fecha de Extravio"),
                 SizedBox(height: 8),
                 DatePickerField(
@@ -93,13 +107,64 @@ class _PetFormScreenState extends State<PetFormScreen> {
                 SizedBox(height: 8),
                 ImagePickerField(
                   selectedImage: _selectedImage,
-                  onTap: _pickImage,
+                  onImagePicked: _onImagePicked,
+                ),
+                SizedBox(height: 16),
+                LocationPickerField(
+                  initialLocation: _selectedLocation,
+                  onLocationPicked: _onLocationPicked,
                 ),
                 SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    StartButton(onPressed:(){}, text: 'Guardar'),
+                    StartButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate() &&
+                            _selectedImage != null &&
+                            _selectedLocation != null &&
+                            _selectedDate != null) {
+                          // Mostrar mensaje de guardado
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Guardando mascota...')),
+                          );
+
+                          // Convertir la imagen a base64
+                          final String base64Image = base64Encode(_selectedImage!);
+
+                          // Formatear la fecha a `YYYY-MM-DD`
+                          final String formattedDate =
+                              '${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}';
+
+                          // Llamar a la función `registerPet`
+                          final petService = Mascotas();
+                          final response = await petService.registerPet(
+                            petName: _nameController.text.trim(),
+                            species: _speciesController.text.trim(),
+                            breed: _breedController.text.trim(),
+                            color: _colorController.text.trim(),
+                            description: _descriptionController.text.trim(),
+                            photo: base64Image,
+                            dateLost: formattedDate,
+                            lastSeenLocation:
+                            '${_selectedLocation!.latitude},${_selectedLocation!.longitude}',
+                            rewardAmount: _rewardController.text.trim(),
+                          );
+
+                          // Mostrar resultado al usuario
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(response)),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Por favor, completa todos los campos requeridos.'),
+                            ),
+                          );
+                        }
+                      },
+                      text: 'Guardar',
+                    ),
                   ],
                 ),
               ],
