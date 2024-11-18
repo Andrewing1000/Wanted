@@ -1,14 +1,14 @@
 import '../model/RequestHandler.dart';
 import 'auth.dart';
-class Mascotas{
+
+class Mascotas {
   final RequestHandler requestHandler = RequestHandler();
   final AuthService Auth = AuthService();
   Future<List<Map<String, dynamic>>> fetchLostPets() async {
-
     try {
       final token = await Auth.getToken();
       final response = await requestHandler.getRequest('post/lost-pets/',
-          headers: {'Authorization':'Token $token'});
+          headers: {'Authorization': 'Token $token'});
       if (response is List) {
         return response.map((item) => Map<String, dynamic>.from(item)).toList();
       } else {
@@ -41,7 +41,7 @@ class Mascotas{
           "color": color,
           "description": description,
           "photo": photo,
-          "date_lost": dateLost, 
+          "date_lost": dateLost,
           "last_seen_location": lastSeenLocation,
           "reward_amount": rewardAmount,
         },

@@ -22,16 +22,23 @@ class UserMe {
   Future<String> GuardarCambios(
       String email, String password, String nombre, String numero) async {
     try {
-      final tokenUser = token.getToken();
-      Request.patchRequest('user/me/', data: {
-        "email": email,
-        "password": password,
-        "name": nombre,
-        "phone_number": numero,
-        "is_active": true,
-      }, headers: {
-        'Authorization': '$tokenUser'
-      });
+      final tokenUser = await token.getToken();
+      print('Token User: $tokenUser');
+
+      await Request.putRequest(
+        'user/me/',
+        data: {
+          "email": email,
+          "password": password,
+          "name": nombre,
+          "phone_number": numero,
+          "is_active": true,
+        },
+        headers: {
+          'Authorization': 'Token $tokenUser',
+        },
+      );
+
       return 'Done';
     } catch (e) {
       return e.toString();
