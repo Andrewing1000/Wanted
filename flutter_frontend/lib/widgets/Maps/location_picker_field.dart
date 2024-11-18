@@ -22,7 +22,7 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
   LatLng? _selectedLocation;
   TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _searchResults = [];
-  final MapController _mapController = MapController(); 
+  final MapController _mapController = MapController();
   bool _isLoading = false;
   bool _noResults = false;
 

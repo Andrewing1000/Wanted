@@ -27,7 +27,7 @@ class _WidgetsTestScreenState extends State<WidgetsTestScreen> {
 
     int index = 0;
     while (true) {
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(Duration(seconds: 5));
       yield coordinates[index];
       index = (index + 1) % coordinates.length;
     }

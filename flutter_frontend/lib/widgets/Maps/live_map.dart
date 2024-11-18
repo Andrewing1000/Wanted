@@ -8,7 +8,7 @@ class LiveMap extends StatefulWidget {
 
   const LiveMap({
     required this.coordinateStream,
-    this.markerBuilder, // Widget para personalizar el marcador
+    this.markerBuilder,
     Key? key,
   }) : super(key: key);
 
@@ -16,20 +16,76 @@ class LiveMap extends StatefulWidget {
   State<LiveMap> createState() => _LiveMapState();
 }
 
-class _LiveMapState extends State<LiveMap> {
-  LatLng _currentPosition = LatLng(-16.5038, -68.1193); // Coordenadas iniciales (La Paz)
-  final MapController _mapController = MapController(); // Controlador del mapa
+class _LiveMapState extends State<LiveMap> with TickerProviderStateMixin {
+  LatLng _currentPosition = LatLng(-16.5038, -68.1193);
+  final MapController _mapController = MapController();
+  late AnimationController _heartbeatController;
+  late Animation<double> _heartbeatAnimation;
 
   @override
   void initState() {
     super.initState();
+
+
+    _heartbeatController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _heartbeatAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
+      CurvedAnimation(parent: _heartbeatController, curve: Curves.easeInOut),
+    );
+
     // Escuchar cambios en el flujo de coordenadas
     widget.coordinateStream.listen((newPosition) {
       setState(() {
         _currentPosition = newPosition;
       });
-      _mapController.move(newPosition, _mapController.zoom); // Centrar mapa en el marcador
+      _animatedMapMove(newPosition, _mapController.zoom);
     });
+  }
+
+  @override
+  void dispose() {
+    _heartbeatController.dispose();
+    super.dispose();
+  }
+
+
+  void _animatedMapMove(LatLng destLocation, double destZoom) {
+    final latTween = Tween<double>(
+      begin: _mapController.center.latitude,
+      end: destLocation.latitude,
+    );
+
+    final lngTween = Tween<double>(
+      begin: _mapController.center.longitude,
+      end: destLocation.longitude,
+    );
+
+    final zoomTween = Tween<double>(
+      begin: _mapController.zoom,
+      end: destZoom,
+    );
+
+    final animationController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    final animation = CurvedAnimation(
+      parent: animationController,
+      curve: Curves.easeInOut,
+    );
+
+    animationController.addListener(() {
+      _mapController.move(
+        LatLng(latTween.evaluate(animation), lngTween.evaluate(animation)),
+        zoomTween.evaluate(animation),
+      );
+    });
+
+    animationController.forward().then((_) => animationController.dispose());
   }
 
   @override
@@ -39,7 +95,7 @@ class _LiveMapState extends State<LiveMap> {
       options: MapOptions(
         center: _currentPosition,
         zoom: 15.0,
-        interactiveFlags: InteractiveFlag.pinchZoom | InteractiveFlag.drag, // Permitir arrastrar y acercar
+        interactiveFlags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
       ),
       children: [
         TileLayer(
@@ -53,27 +109,34 @@ class _LiveMapState extends State<LiveMap> {
               width: 80,
               height: 80,
               builder: (context) {
-                // Construir marcador personalizado si se proporciona, de lo contrario usar un marcador predeterminado
+
                 return widget.markerBuilder != null
                     ? widget.markerBuilder!(context, _currentPosition)
-                    : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 40,
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Marcador',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
+                    : AnimatedBuilder(
+                  animation: _heartbeatAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _heartbeatAnimation.value,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.red,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.red.withOpacity(0.5),
+                              blurRadius: _heartbeatAnimation.value * 8,
+                              spreadRadius: _heartbeatAnimation.value * 2,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.location_on,
+                          color: Colors.white,
+                          size: 40,
+                        ),
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 );
               },
             ),
