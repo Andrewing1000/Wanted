@@ -5,6 +5,7 @@ import 'home_page.dart';
 import 'form_page.dart';
 import '../widgets/manage_screen_widgets/main_app_bar.dart';
 import '../widgets/manage_screen_widgets/bottom_naviagation_bar.dart';
+import 'testing/test_widgets.dart';
 
 class ManagerScreen extends StatefulWidget {
   @override
@@ -68,7 +69,7 @@ class _ManagerScreenState extends State<ManagerScreen> {
         physics: NeverScrollableScrollPhysics(),
         children: [
           HomePage(),
-          Center(child: Text('Guardados')),
+          WidgetsTestScreen(),
           PetFormScreen(),
           Center(child: Text('Avistamientos Creados')),
           Center(child: Text('Usuario')),

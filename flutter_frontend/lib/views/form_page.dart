@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:typed_data'; // Para Uint8List
 import '../widgets/form_widgets/image_picker.dart';
-import '../widgets/form_widgets/location_picker_field.dart';
+import '../widgets/Maps/location_picker_field.dart';
 import '../widgets/text_input_field.dart';
 import '../widgets/form_widgets/description_input_field.dart';
 import '../widgets/form_widgets/date_picker.dart';
@@ -111,7 +111,7 @@ class _PetFormScreenState extends State<PetFormScreen> {
                 ),
                 SizedBox(height: 16),
                 LocationPickerField(
-                  initialLocation: _selectedLocation,
+                  initialLocation:  LatLng(-16.5038, -68.1193),
                   onLocationPicked: _onLocationPicked,
                 ),
                 SizedBox(height: 16),
