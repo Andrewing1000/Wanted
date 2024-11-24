@@ -1,85 +1,30 @@
-import { RequestHandler } from "@/controller/RequestHandler";
+import axios from "axios";
 
-export class AsignaturaModel {
-  constructor() {
-    this.requestHandler = new RequestHandler();
-  }
+let url = 'http://localhost:8080'
 
-  // Obtener todas las asignaturas
-  async obtenerTodasAsignaturas() {
-    try {
-      const response = await this.requestHandler.getRequest(
-        "/post/comments/"
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error al obtener las asignaturas:", error);
-      throw error;
-    }
-  }
-
-  // Obtener una asignatura por ID
-  async obtenerAsignatura(id) {
-    try {
-      const response = await this.requestHandler.getRequest(
-        `/post/comments/${id}/`
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Error al obtener la asignatura con ID ${id}:`, error);
-      throw error;
-    }
-  }
-
-  // Crear una nueva asignatura
-  async crearAsignatura(nombre, grado, colegio) {
-    const data = {
-      nombre: nombre,
-      grado: grado,
-      colegio: colegio,
-    };
-    try {
-      const response = await this.requestHandler.postRequest(
-        "/post/comments/",
-        data
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error al crear la asignatura:", error);
-      throw error;
-    }
-  }
-
-  // Actualizar una asignatura por ID
-  async actualizarAsignatura(id, nombre, grado, colegio) {
-    const data = {
-      nombre: nombre,
-      grado: grado,
-      colegio: colegio,
-    };
-    try {
-      const response = await this.requestHandler.putRequest(
-        `/post/comments/${id}/`,
-        data
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Error al actualizar la asignatura con ID ${id}:`, error);
-      throw error;
-    }
-  }
-
-  // Eliminar una asignatura por ID
-  async eliminarAsignatura(id) {
-    try {
-      const response = await this.requestHandler.deleteRequest(
-        `/post/comments/${id}/`
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Error al eliminar la asignatura con ID ${id}:`, error);
-      throw error;
-    }
-  }
-
+let admin={
+  email: 'admin@example.com',
+  password: 'admin'
 }
+
+let response = await axios.post(url+'/user/token/',admin)
+let tokenS = response.data.token
+
+console.log(tokenS);
+
+
+let config = {
+  headers: {
+    Authorization: 'Token '+tokenS,
+  }
+}
+
+let xd = await axios.get(url+'/user/me/',config)
+
+let xd2 = await axios.get(url+'/post/lost-pets/',config)
+
+axios.put(url+'/post/lost-pets/',datos,config)
+
+axios.post(url+'/post/lost-pets/'+id+'/',datos,config)
+console.log(xd2);
+
