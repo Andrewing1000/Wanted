@@ -9,6 +9,7 @@ import 'widgets/text_input_field.dart';
 import 'widgets/hyperlink_text.dart';
 import 'widgets/start_button.dart';
 import 'registro.dart';
+import 'Services/LoginMaure.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _popo = TextEditingController();
 
 
   @override
@@ -111,6 +113,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                       },
                     ),
+                    TextInputField(labelText: 'pop', controller:_popo),
                     SizedBox(height: 20),
                     TextInputField(
                       labelText: 'Ingrese su correo',
@@ -163,6 +166,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       },
                     ),
                     SizedBox(height: 20),
+                    StartButton(onPressed: () async{
+                        login popo =login();
+                        var correo=_popo.text.trim();
+                        var passwo =_passwordController.text.trim();
+                        popo.InicioSesion(correo, passwo);
+                    }, text: 'popo'),
                   ],
                 ),
               ),

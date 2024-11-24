@@ -4,26 +4,15 @@ import 'package:http/http.dart' as http;
 class RequestHandler {
   final String baseUrl;
 
-  RequestHandler({this.baseUrl = 'http://localhost:8000/api'});
-
-
-  static const String token = "your-authentication-token";
-
-
-  Map<String, String> getHeaders({Map<String, String>? customHeaders}) {
-    return {
-      "Authorization": "Token $token",
-      "Content-Type": "application/json",
-      ...?customHeaders,
-    };
-  }
+  RequestHandler({this.baseUrl = 'http://localhost:8080/'});
 
   // Método para realizar solicitudes GET
   Future<dynamic> getRequest(String endpoint,
       {Map<String, String>? params, Map<String, String>? headers}) async {
     try {
-      final uri = Uri.parse('$baseUrl/$endpoint').replace(queryParameters: params);
-      final response = await http.get(uri, headers: getHeaders(customHeaders: headers));
+      final uri =
+      Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
+      final response = await http.get(uri, headers: headers);
       return _handleResponse(response);
     } catch (e) {
       _handleError(e);
@@ -32,13 +21,22 @@ class RequestHandler {
 
   // Método para realizar solicitudes POST
   Future<dynamic> postRequest(String endpoint,
-      {Map<String, dynamic>? data, Map<String, String>? params, Map<String, String>? headers}) async {
+      {Map<String, dynamic>? data,
+        Map<String, String>? params,
+        Map<String, String>? headers}) async {
     try {
-      final uri = Uri.parse('$baseUrl/$endpoint').replace(queryParameters: params);
+      final uri =
+      Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
       final response = await http.post(
         uri,
         body: jsonEncode(data),
-        headers: getHeaders(customHeaders: headers),
+        headers: {
+          'Content-Type': 'application/json',
+          if (headers != null && headers.containsKey('Authorization'))
+            'Authorization':
+            'Token ${headers['Authorization']!.replaceAll('Token ', '')}',
+          ...?headers,
+        },
       );
       return _handleResponse(response);
     } catch (e) {
@@ -46,15 +44,24 @@ class RequestHandler {
     }
   }
 
-  // Método para realizar solicitudes PUT
+// Método para realizar solicitudes PUT
   Future<dynamic> putRequest(String endpoint,
-      {Map<String, dynamic>? data, Map<String, String>? params, Map<String, String>? headers}) async {
+      {Map<String, dynamic>? data,
+        Map<String, String>? params,
+        Map<String, String>? headers}) async {
     try {
-      final uri = Uri.parse('$baseUrl/$endpoint').replace(queryParameters: params);
+      final uri =
+      Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
       final response = await http.put(
         uri,
         body: jsonEncode(data),
-        headers: getHeaders(customHeaders: headers),
+        headers: {
+          'Content-Type': 'application/json',
+          if (headers != null && headers.containsKey('Authorization'))
+            'Authorization':
+            'Token ${headers['Authorization']!.replaceAll('Token ', '')}',
+          ...?headers,
+        },
       );
       return _handleResponse(response);
     } catch (e) {
@@ -62,27 +69,45 @@ class RequestHandler {
     }
   }
 
-  // Método para realizar solicitudes DELETE
+// Método para realizar solicitudes DELETE
   Future<dynamic> deleteRequest(String endpoint,
       {Map<String, String>? params, Map<String, String>? headers}) async {
     try {
-      final uri = Uri.parse('$baseUrl/$endpoint').replace(queryParameters: params);
-      final response = await http.delete(uri, headers: getHeaders(customHeaders: headers));
+      final uri =
+      Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
+      final response = await http.delete(
+        uri,
+        headers: {
+          if (headers != null && headers.containsKey('Authorization'))
+            'Authorization':
+            'Token ${headers['Authorization']!.replaceAll('Token ', '')}',
+          ...?headers,
+        },
+      );
       return _handleResponse(response);
     } catch (e) {
       _handleError(e);
     }
   }
 
-  // Método para realizar solicitudes PATCH
+// Método para realizar solicitudes PATCH
   Future<dynamic> patchRequest(String endpoint,
-      {Map<String, dynamic>? data, Map<String, String>? params, Map<String, String>? headers}) async {
+      {Map<String, dynamic>? data,
+        Map<String, String>? params,
+        Map<String, String>? headers}) async {
     try {
-      final uri = Uri.parse('$baseUrl/$endpoint').replace(queryParameters: params);
+      final uri =
+      Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
       final response = await http.patch(
         uri,
         body: jsonEncode(data),
-        headers: getHeaders(customHeaders: headers),
+        headers: {
+          'Content-Type': 'application/json',
+          if (headers != null && headers.containsKey('Authorization'))
+            'Authorization':
+            'Token ${headers['Authorization']!.replaceAll('Token ', '')}',
+          ...?headers,
+        },
       );
       return _handleResponse(response);
     } catch (e) {
