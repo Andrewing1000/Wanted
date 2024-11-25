@@ -88,5 +88,32 @@ Future<String> registerCreate(String correo,String contrasenia,String nombre, St
 
 
 
+  //// NO TOCAR
+  Future<String> Connection() async {
+    var con = RequestHandler();
+
+    try {
+      final response = con.getRequest('health_check');
+      print('Respuesta obtenida: $response');
+
+      final errorJson = jsonDecode(response as String)['status'];
+      print('Estado decodificado: $errorJson');
+
+      if (errorJson == 'Error al conectar con el servidor') {
+        print('Error: No se pudo conectar al servidor.');
+        return 'Error al conectar con el servidor';
+      }
+
+      print('Conexión exitosa.');
+      return 'Conexión exitosa';
+    } catch (e) {
+      print('Excepción capturada: $e');
+      return 'Error al procesar la solicitud';
+    }
+  }
+
+
+
+
 
 }

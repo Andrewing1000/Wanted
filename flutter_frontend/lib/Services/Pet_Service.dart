@@ -25,7 +25,7 @@ class Mascotas {
     required String breed,
     required String color,
     required String description,
-    required String photo,
+    required String? photo,
     required String dateLost,
     required String lastSeenLocation,
     required String rewardAmount,

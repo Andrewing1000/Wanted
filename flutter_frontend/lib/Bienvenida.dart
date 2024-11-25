@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mascotas_flutter/widgets/Logo.dart';
 import 'widgets/titles.dart';
 import 'widgets/start_button.dart';
+import 'Services/auth.dart';
 import 'login.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -22,7 +24,7 @@ class WelcomeScreen extends StatelessWidget {
               SubtitleWidget(),
               SizedBox(height: 30),
               StartButton(
-                onPressed: () {
+                onPressed: (){
                   Navigator.push(
                     context,
                     PageRouteBuilder(
@@ -32,6 +34,8 @@ class WelcomeScreen extends StatelessWidget {
                       },
                     ),
                   );
+
+
                 }, text: 'Empezar',
               ),
             ],
