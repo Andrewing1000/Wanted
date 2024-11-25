@@ -3,6 +3,7 @@ package com.example.mascotas_flutter
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.FrameLayout
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import io.flutter.embedding.engine.FlutterEngine
@@ -18,15 +19,14 @@ class MapAdapterView(
 ) : PlatformView, MethodChannel.MethodCallHandler {
 
     private val methodChannel: MethodChannel
-    private var googleMapOptions: GoogleMapOptions = GoogleMapOptions()
-    private val mapView: MapView = MapView(context, googleMapOptions)
+    private val container: FrameLayout = FrameLayout(context)
+    private val mapView: MapView = MapView(context)
+    private val streetView: StreetViewPanoramaView = StreetViewPanoramaView(context)
     private var googleMap: GoogleMap? = null
+    private var streetViewPanorama: StreetViewPanorama? = null
     private val markers = mutableMapOf<String, Marker>()
     private val polylines = mutableMapOf<String, Polyline>()
     private val polygons = mutableMapOf<String, Polygon>()
-    private val streetView: StreetViewPanoramaView = StreetViewPanoramaView(context)
-    private var streetViewPanorama: StreetViewPanorama? = null
-    private var currentMode: String = "map"
 
     init {
         methodChannel = MethodChannel(
@@ -35,30 +35,14 @@ class MapAdapterView(
         )
         methodChannel.setMethodCallHandler(this)
 
+        // Initialize MapView
         mapView.onCreate(Bundle())
-        streetView.onCreate(Bundle())
-
-        initializeMap()
-        initializeStreetView()
-    }
-
-    private fun initializeMap() {
-
-        googleMapOptions.ambientEnabled(false)
-        googleMapOptions.compassEnabled(true)
-
-        googleMapOptions.zoomGesturesEnabled(true)
-        googleMapOptions.scrollGesturesEnabled(false)
-        googleMapOptions.tiltGesturesEnabled(false)
-        googleMapOptions.rotateGesturesEnabled(true)
-
-
         mapView.getMapAsync { gMap ->
             googleMap = gMap
 
             val initialCameraPosition = creationParams?.get("initialCameraPosition") as? Map<*, *>
-            val latitude = initialCameraPosition?.get("latitude") as? Double ?: 0.0
-            val longitude = initialCameraPosition?.get("longitude") as? Double ?: 0.0
+            val latitude = initialCameraPosition?.get("latitude") as? Double ?: 37.7749
+            val longitude = initialCameraPosition?.get("longitude") as? Double ?: -122.4194
             val zoom = (initialCameraPosition?.get("zoom") as? Double)?.toFloat() ?: 12.0f
 
             val target = LatLng(latitude, longitude)
@@ -88,9 +72,9 @@ class MapAdapterView(
                 ))
             }
         }
-    }
 
-    private fun initializeStreetView() {
+        // Initialize StreetViewPanoramaView
+        streetView.onCreate(Bundle())
         streetView.getStreetViewPanoramaAsync { panorama ->
             streetViewPanorama = panorama
             streetViewPanorama?.setOnStreetViewPanoramaChangeListener { location ->
@@ -100,10 +84,24 @@ class MapAdapterView(
                 ))
             }
         }
+
+        // Add both views to the container
+        container.addView(mapView, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ))
+        container.addView(streetView, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ))
+
+        // Initially show MapView and hide StreetView
+        mapView.visibility = View.VISIBLE
+        streetView.visibility = View.GONE
     }
 
     override fun getView(): View {
-        return if (currentMode == "map") mapView else streetView
+        return container
     }
 
     override fun dispose() {
@@ -135,15 +133,15 @@ class MapAdapterView(
                 result.success(null)
             }
             "switchToStreetView" -> {
-                val latitude = call.argument<Double>("latitude") ?: 0.0
-                val longitude = call.argument<Double>("longitude") ?: 0.0
+                val latitude = call.argument<Double>("latitude") ?: 37.7749
+                val longitude = call.argument<Double>("longitude") ?: -122.4194
                 switchToStreetView(latitude, longitude)
                 result.success(null)
             }
             "addMarker" -> {
                 val id = call.argument<String>("id") ?: ""
-                val latitude = call.argument<Double>("latitude") ?: 0.0
-                val longitude = call.argument<Double>("longitude") ?: 0.0
+                val latitude = call.argument<Double>("latitude") ?: 37.7749
+                val longitude = call.argument<Double>("longitude") ?: -122.4194
                 val title = call.argument<String>("title")
                 addMarker(id, latitude, longitude, title)
                 result.success(null)
@@ -162,15 +160,15 @@ class MapAdapterView(
                 result.success(null)
             }
             "moveCamera" -> {
-                val latitude = call.argument<Double>("latitude") ?: 0.0
-                val longitude = call.argument<Double>("longitude") ?: 0.0
+                val latitude = call.argument<Double>("latitude") ?: 37.7749
+                val longitude = call.argument<Double>("longitude") ?: -122.4194
                 val zoom = call.argument<Double>("zoom")?.toFloat()
                 moveCamera(latitude, longitude, zoom)
                 result.success(null)
             }
             "animateCamera" -> {
-                val latitude = call.argument<Double>("latitude") ?: 0.0
-                val longitude = call.argument<Double>("longitude") ?: 0.0
+                val latitude = call.argument<Double>("latitude") ?: 37.7749
+                val longitude = call.argument<Double>("longitude") ?: -122.4194
                 val zoom = call.argument<Double>("zoom")?.toFloat()
                 animateCamera(latitude, longitude, zoom)
                 result.success(null)
@@ -182,9 +180,9 @@ class MapAdapterView(
             }
             "setStreetViewRestrictions" -> {
                 val pan = call.argument<Boolean>("pan") ?: true
-                val nav =  call.argument<Boolean>("nav") ?: true
                 val zoom = call.argument<Boolean>("zoom") ?: true
-                setStreetViewRestrictions(pan, nav, zoom)
+                val nav = call.argument<Boolean>("nav") ?: true
+                setStreetViewRestrictions(pan, zoom, nav)
                 result.success(null)
             }
             "setMapGesturesEnabled" -> {
@@ -233,16 +231,18 @@ class MapAdapterView(
     }
 
     // Map and Street View control methods
-    fun switchToMapView() {
-        currentMode = "map"
+    private fun switchToMapView() {
+        mapView.visibility = View.VISIBLE
+        streetView.visibility = View.GONE
     }
 
-    fun switchToStreetView(latitude: Double, longitude: Double) {
-        currentMode = "street"
+    private fun switchToStreetView(latitude: Double, longitude: Double) {
+        mapView.visibility = View.GONE
+        streetView.visibility = View.VISIBLE
         streetViewPanorama?.setPosition(LatLng(latitude, longitude))
     }
 
-    fun addMarker(id: String, latitude: Double, longitude: Double, title: String?) {
+    private fun addMarker(id: String, latitude: Double, longitude: Double, title: String?) {
         val position = LatLng(latitude, longitude)
         val markerOptions = MarkerOptions().position(position).title(title)
         val marker = googleMap?.addMarker(markerOptions)
@@ -252,13 +252,13 @@ class MapAdapterView(
         }
     }
 
-    fun removeMarker(id: String) {
+    private fun removeMarker(id: String) {
         val marker = markers[id]
         marker?.remove()
         markers.remove(id)
     }
 
-    fun updateMarker(id: String, latitude: Double?, longitude: Double?, title: String?) {
+    private fun updateMarker(id: String, latitude: Double?, longitude: Double?, title: String?) {
         val marker = markers[id]
         if (marker != null) {
             if (latitude != null && longitude != null) {
@@ -270,7 +270,7 @@ class MapAdapterView(
         }
     }
 
-    fun moveCamera(latitude: Double, longitude: Double, zoom: Float?) {
+    private fun moveCamera(latitude: Double, longitude: Double, zoom: Float?) {
         val position = CameraPosition.Builder()
             .target(LatLng(latitude, longitude))
             .zoom(zoom ?: googleMap?.cameraPosition?.zoom ?: 12.0f)
@@ -278,7 +278,7 @@ class MapAdapterView(
         googleMap?.moveCamera(CameraUpdateFactory.newCameraPosition(position))
     }
 
-    fun animateCamera(latitude: Double, longitude: Double, zoom: Float?) {
+    private fun animateCamera(latitude: Double, longitude: Double, zoom: Float?) {
         val position = CameraPosition.Builder()
             .target(LatLng(latitude, longitude))
             .zoom(zoom ?: googleMap?.cameraPosition?.zoom ?: 12.0f)
@@ -286,30 +286,30 @@ class MapAdapterView(
         googleMap?.animateCamera(CameraUpdateFactory.newCameraPosition(position))
     }
 
-    fun setMapStyle(styleJson: String) {
+    private fun setMapStyle(styleJson: String) {
         googleMap?.setMapStyle(MapStyleOptions(styleJson))
     }
 
-    fun setStreetViewRestrictions(pan: Boolean, nav: Boolean, zoom: Boolean) {
+    private fun setStreetViewRestrictions(pan: Boolean, zoom: Boolean, nav: Boolean) {
         streetViewPanorama?.setPanningGesturesEnabled(pan)
-        streetViewPanorama?.setUserNavigationEnabled(nav)
         streetViewPanorama?.setZoomGesturesEnabled(zoom)
-        // Tilt gestures are not available in StreetViewPanoramaUiSettings
+        streetViewPanorama?.setUserNavigationEnabled(nav)
+        // Note: Tilt gestures are not available in StreetViewPanoramaUiSettings
     }
 
-    fun setMapGesturesEnabled(zoom: Boolean, scroll: Boolean, tilt: Boolean, rotate: Boolean) {
+    private fun setMapGesturesEnabled(zoom: Boolean, scroll: Boolean, tilt: Boolean, rotate: Boolean) {
         googleMap?.getUiSettings()?.setZoomGesturesEnabled(zoom)
         googleMap?.getUiSettings()?.setScrollGesturesEnabled(scroll)
         googleMap?.getUiSettings()?.setTiltGesturesEnabled(tilt)
         googleMap?.getUiSettings()?.setRotateGesturesEnabled(rotate)
     }
 
-    fun setUIControls(compassEnabled: Boolean, myLocationButtonEnabled: Boolean) {
-        googleMap?.getUiSettings()?.setCompassEnabled(compassEnabled)
-        googleMap?.getUiSettings()?.setMyLocationButtonEnabled(myLocationButtonEnabled)
+    private fun setUIControls(compassEnabled: Boolean, myLocationButtonEnabled: Boolean) {
+        googleMap?.getUiSettings()?.setCompassEnabled(compassEnabled);
+        googleMap?.getUiSettings()?.setMyLocationButtonEnabled(myLocationButtonEnabled);
     }
 
-    fun addPolyline(id: String, points: List<LatLng>, color: Int) {
+    private fun addPolyline(id: String, points: List<LatLng>, color: Int) {
         val polylineOptions = PolylineOptions()
             .addAll(points)
             .color(color)
@@ -319,7 +319,7 @@ class MapAdapterView(
         }
     }
 
-    fun addPolygon(id: String, points: List<LatLng>, fillColor: Int, strokeColor: Int) {
+    private fun addPolygon(id: String, points: List<LatLng>, fillColor: Int, strokeColor: Int) {
         val polygonOptions = PolygonOptions()
             .addAll(points)
             .fillColor(fillColor)
@@ -330,12 +330,12 @@ class MapAdapterView(
         }
     }
 
-    fun removePolyline(id: String) {
+    private fun removePolyline(id: String) {
         polylines[id]?.remove()
         polylines.remove(id)
     }
 
-    fun removePolygon(id: String) {
+    private fun removePolygon(id: String) {
         polygons[id]?.remove()
         polygons.remove(id)
     }

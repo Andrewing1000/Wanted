@@ -2,24 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class MapAdapter extends StatefulWidget {
+  final MapAdapterController controller;
   final Function(String markerId)? onMarkerClick;
   final Function(double latitude, double longitude)? onMapClick;
   final Function(double latitude, double longitude)? onStreetViewChange;
   final Function(double latitude, double longitude, double zoom)? onCameraIdle;
   final Map<String, dynamic>? initialCameraPosition;
   final double height;
-  final bool streetMode;
 
   const MapAdapter({
-    super.key,
-    this.streetMode = false,
+    Key? key,
+    required this.controller,
     this.onMarkerClick,
     this.onMapClick,
     this.onStreetViewChange,
     this.onCameraIdle,
     this.initialCameraPosition,
     this.height = 400.0,
-  });
+  }) : super(key: key);
 
   @override
   MapAdapterState createState() => MapAdapterState();
@@ -29,13 +29,23 @@ class MapAdapterState extends State<MapAdapter> {
   late MethodChannel _platformChannel;
   int? _viewId;
 
-  late AndroidView map;
-
   @override
   void initState() {
     super.initState();
+    widget.controller._attach(this);
+  }
 
-    map = AndroidView(
+  @override
+  void dispose() {
+    widget.controller._detach();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: widget.height,
+      child: AndroidView(
         viewType: 'com.example.map_adapter',
         onPlatformViewCreated: _onPlatformViewCreated,
         creationParams: {
@@ -43,25 +53,11 @@ class MapAdapterState extends State<MapAdapter> {
               {
                 'latitude': 37.7749,
                 'longitude': -122.4194,
-                'zoom': 1.0,
+                'zoom': 12.0,
               }
         },
         creationParamsCodec: const StandardMessageCodec(),
-      );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if(widget.streetMode){
-      print("A la calle");
-      switchToStreetView(37.7749, -122.4194);
-    }
-    else{
-      switchToMapView();
-    }
-    return SizedBox(
-      height: widget.height,
-      child: map,
+      ),
     );
   }
 
@@ -69,6 +65,7 @@ class MapAdapterState extends State<MapAdapter> {
     _viewId = id;
     _platformChannel = MethodChannel('com.example.map_adapter_$id');
     _platformChannel.setMethodCallHandler(_handleMethodCall);
+    widget.controller._setMethodChannel(_platformChannel);
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
@@ -102,18 +99,34 @@ class MapAdapterState extends State<MapAdapter> {
         break;
     }
   }
+}
+
+class MapAdapterController {
+  MethodChannel? _platformChannel;
+  MapAdapterState? _mapAdapterState;
+
+  void _attach(MapAdapterState state) {
+    _mapAdapterState = state;
+  }
+
+  void _detach() {
+    _mapAdapterState = null;
+    _platformChannel = null;
+  }
+
+  void _setMethodChannel(MethodChannel channel) {
+    _platformChannel = channel;
+  }
 
   Future<void> switchToMapView() async {
-    await _platformChannel.invokeMethod('switchToMapView');
-    //setState(() {});
+    await _platformChannel?.invokeMethod('switchToMapView');
   }
 
   Future<void> switchToStreetView(double latitude, double longitude) async {
-    await _platformChannel.invokeMethod('switchToStreetView', {
+    await _platformChannel?.invokeMethod('switchToStreetView', {
       'latitude': latitude,
       'longitude': longitude,
     });
-    //setState(() {});
   }
 
   Future<void> addMarker({
@@ -123,7 +136,7 @@ class MapAdapterState extends State<MapAdapter> {
     String? title,
   }) async {
     try {
-      await _platformChannel.invokeMethod('addMarker', {
+      await _platformChannel?.invokeMethod('addMarker', {
         'id': id,
         'latitude': latitude,
         'longitude': longitude,
@@ -136,7 +149,7 @@ class MapAdapterState extends State<MapAdapter> {
 
   Future<void> removeMarker(String id) async {
     try {
-      await _platformChannel.invokeMethod('removeMarker', {'id': id});
+      await _platformChannel?.invokeMethod('removeMarker', {'id': id});
     } catch (e) {
       print('Error removing marker: $e');
     }
@@ -149,7 +162,7 @@ class MapAdapterState extends State<MapAdapter> {
     String? title,
   }) async {
     try {
-      await _platformChannel.invokeMethod('updateMarker', {
+      await _platformChannel?.invokeMethod('updateMarker', {
         'id': id,
         'latitude': latitude,
         'longitude': longitude,
@@ -165,7 +178,7 @@ class MapAdapterState extends State<MapAdapter> {
     required double longitude,
     double? zoom,
   }) async {
-    await _platformChannel.invokeMethod('moveCamera', {
+    await _platformChannel?.invokeMethod('moveCamera', {
       'latitude': latitude,
       'longitude': longitude,
       'zoom': zoom,
@@ -177,7 +190,7 @@ class MapAdapterState extends State<MapAdapter> {
     required double longitude,
     double? zoom,
   }) async {
-    await _platformChannel.invokeMethod('animateCamera', {
+    await _platformChannel?.invokeMethod('animateCamera', {
       'latitude': latitude,
       'longitude': longitude,
       'zoom': zoom,
@@ -185,7 +198,7 @@ class MapAdapterState extends State<MapAdapter> {
   }
 
   Future<void> setMapStyle(String styleJson) async {
-    await _platformChannel.invokeMethod('setMapStyle', {'styleJson': styleJson});
+    await _platformChannel?.invokeMethod('setMapStyle', {'styleJson': styleJson});
   }
 
   Future<void> setStreetViewRestrictions({
@@ -193,10 +206,10 @@ class MapAdapterState extends State<MapAdapter> {
     required bool zoom,
     required bool nav,
   }) async {
-    await _platformChannel.invokeMethod('setStreetViewRestrictions', {
+    await _platformChannel?.invokeMethod('setStreetViewRestrictions', {
       'pan': pan,
       'nav': nav,
-      'zoom': zoom, 
+      'zoom': zoom,
     });
   }
 
@@ -206,7 +219,7 @@ class MapAdapterState extends State<MapAdapter> {
     required bool tilt,
     required bool rotate,
   }) async {
-    await _platformChannel.invokeMethod('setMapGesturesEnabled', {
+    await _platformChannel?.invokeMethod('setMapGesturesEnabled', {
       'zoom': zoom,
       'scroll': scroll,
       'tilt': tilt,
@@ -218,7 +231,7 @@ class MapAdapterState extends State<MapAdapter> {
     required bool compassEnabled,
     required bool myLocationButtonEnabled,
   }) async {
-    await _platformChannel.invokeMethod('setUIControls', {
+    await _platformChannel?.invokeMethod('setUIControls', {
       'compassEnabled': compassEnabled,
       'myLocationButtonEnabled': myLocationButtonEnabled,
     });
@@ -229,7 +242,7 @@ class MapAdapterState extends State<MapAdapter> {
     required List<Map<String, double>> points,
     int color = 0xFF0000FF,
   }) async {
-    await _platformChannel.invokeMethod('addPolyline', {
+    await _platformChannel?.invokeMethod('addPolyline', {
       'id': id,
       'points': points,
       'color': color,
@@ -242,7 +255,7 @@ class MapAdapterState extends State<MapAdapter> {
     int fillColor = 0x550000FF,
     int strokeColor = 0xFF0000FF,
   }) async {
-    await _platformChannel.invokeMethod('addPolygon', {
+    await _platformChannel?.invokeMethod('addPolygon', {
       'id': id,
       'points': points,
       'fillColor': fillColor,
@@ -251,10 +264,10 @@ class MapAdapterState extends State<MapAdapter> {
   }
 
   Future<void> removePolyline(String id) async {
-    await _platformChannel.invokeMethod('removePolyline', {'id': id});
+    await _platformChannel?.invokeMethod('removePolyline', {'id': id});
   }
 
   Future<void> removePolygon(String id) async {
-    await _platformChannel.invokeMethod('removePolygon', {'id': id});
+    await _platformChannel?.invokeMethod('removePolygon', {'id': id});
   }
 }
