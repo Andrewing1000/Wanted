@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import '../widgets/HomeWidget/tab_bar_widget.dart';
 import '../widgets/pet_card.dart';
 import '../services/Pet_Service.dart';
+import 'PetLocationMap.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -56,36 +58,108 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   void showPetDetailsModal(BuildContext context, Map<String, dynamic> pet) {
+    bool isFavorite = false;
+
     showDialog(
       context: context,
       builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  pet['pet_name'] ?? 'Nombre desconocido',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            pet['pet_name'] ?? 'Nombre desconocido',
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              isFavorite = !isFavorite;
+                            });
+                          },
+                          child: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite ? Colors.red : Colors.grey,
+                            size: 28,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      "Descripción: ${pet['description'] ?? 'Sin descripción'}",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.lightBlueAccent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          onPressed: () async {
+                            // Llama a fetchLastSeenLocation para obtener los datos
+                            final lastSeenData = await fetchLastSeenLocation(1); // Simula petId = 1
+                            final coordinates = lastSeenData['coordinates'];
+                            final LatLng petLocation = LatLng(
+                              coordinates['lat'],
+                              coordinates['lng'],
+                            );
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PetLocationMap(
+                                  petLocation: petLocation,
+                                  petName: pet['pet_name'] ?? "Sin nombre",
+                                  petDescription: pet['description'] ?? "Sin descripción",
+                                ),
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.location_on),
+                          label: Text("Última ubicación"),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: Text("Cerrar"),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                SizedBox(height: 8),
-                Text(
-                  "Descripción: ${pet['description'] ?? 'Sin descripción'}",
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text("Cerrar"),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -122,6 +196,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   status: pet['status'] ?? 'Desconocido',
                   imageUrl: pet['photo'] ?? 'assets/placeholder.png',
                   onTap: () => showPetDetailsModal(context, pet),
+
                 );
               },
             ),
@@ -131,3 +206,64 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 }
+void showLastSeenModal(BuildContext context, int petId) async {
+  // Simula la obtención de datos de la última ubicación
+  final Map<String, dynamic> lastSeenData = await fetchLastSeenLocation(petId);
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Última ubicación",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text(
+                "Fecha: ${lastSeenData['date']}",
+                style: TextStyle(fontSize: 16),
+              ),
+              Text(
+                "Hora: ${lastSeenData['time']}",
+                style: TextStyle(fontSize: 16),
+              ),
+              Text(
+                "Lugar: ${lastSeenData['location']}",
+                style: TextStyle(fontSize: 16),
+              ),
+              Text(
+                "Coordenadas: ${lastSeenData['coordinates'][' -16.5038']}, ${lastSeenData['coordinates']['-68.1193']}",
+                style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 16),
+              Center(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Cerrar"),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+
+
