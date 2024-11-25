@@ -77,6 +77,7 @@ class _ManagerScreenState extends State<ManagerScreen> {
         children: [
           HomePage(),
           WidgetsTestScreen(),
+          //favoritos();
           PetFormScreen(),
           Center(child: Text('Avistamientos Creados')),
           _isEditingProfile
