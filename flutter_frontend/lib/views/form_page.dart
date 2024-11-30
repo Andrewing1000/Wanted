@@ -121,7 +121,6 @@ class _PetFormScreenState extends State<PetFormScreen> {
                     StartButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate() &&
-                            _selectedImage != null &&
                             _selectedLocation != null &&
                             _selectedDate != null) {
                           // Mostrar mensaje de guardado
@@ -129,8 +128,10 @@ class _PetFormScreenState extends State<PetFormScreen> {
                             SnackBar(content: Text('Guardando mascota...')),
                           );
 
-                          // Convertir la imagen a base64
-                          final String base64Image = base64Encode(_selectedImage!);
+                          // Si no hay imagen seleccionada, se asigna null
+                          final String? base64Image = _selectedImage != null
+                              ? base64Encode(_selectedImage!)
+                              : null;
 
                           // Formatear la fecha a `YYYY-MM-DD`
                           final String formattedDate =
@@ -144,18 +145,19 @@ class _PetFormScreenState extends State<PetFormScreen> {
                             breed: _breedController.text.trim(),
                             color: _colorController.text.trim(),
                             description: _descriptionController.text.trim(),
-                            photo: base64Image,
+                            photo: base64Image, // Puede ser null si no se sube foto
                             dateLost: formattedDate,
                             lastSeenLocation:
-                            '${_selectedLocation!.latitude},${_selectedLocation!.longitude}',
+                                '${_selectedLocation!.latitude},${_selectedLocation!.longitude}',
                             rewardAmount: _rewardController.text.trim(),
                           );
 
-                          // Mostrar resultado al usuario
+                          // Mostrar respuesta del servidor al usuario
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(response)),
                           );
                         } else {
+                          // Mostrar mensaje de error si no se completaron todos los campos
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Por favor, completa todos los campos requeridos.'),

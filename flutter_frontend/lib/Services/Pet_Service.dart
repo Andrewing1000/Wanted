@@ -30,6 +30,7 @@ class Mascotas {
     required String lastSeenLocation,
     required String rewardAmount,
   }) async {
+    photo ??= null;
     try {
       final token = await Auth.getToken();
       final response = await requestHandler.postRequest(
