@@ -24,8 +24,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _popo = TextEditingController();
-
 
   @override
   void initState() {
@@ -113,7 +111,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                       },
                     ),
-                    TextInputField(labelText: 'pop', controller:_popo),
+
+
                     SizedBox(height: 20),
                     TextInputField(
                       labelText: 'Ingrese su correo',
@@ -166,12 +165,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       },
                     ),
                     SizedBox(height: 20),
-                    StartButton(onPressed: () async{
-                        login popo =login();
-                        var correo=_popo.text.trim();
-                        var passwo =_passwordController.text.trim();
-                        popo.InicioSesion(correo, passwo);
-                    }, text: 'popo'),
+                  
                   ],
                 ),
               ),

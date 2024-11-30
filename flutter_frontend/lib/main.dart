@@ -8,7 +8,7 @@ import 'Services/auth.dart';
 
 void main() async {
   final reponse = RequestHandler();
-  await perro();
+  //await perro();
   WidgetsFlutterBinding.ensureInitialized();
   await checkServerConnection();
   //await Registro();
