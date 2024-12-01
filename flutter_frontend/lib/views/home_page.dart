@@ -124,7 +124,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 return PetCard(
                   username: pet['owner'] ?? 'Usuario desconocido',
                   petName: pet['pet_name'] ?? 'Mascota desconocida',
-                  status: Perdido ?? 'Desconocido',
+                  status: pet['status'] ?? 'Desconocido',
                   imageUrl: pet['photo'] ?? 'assets/dummy.jpg',
                   dateLost: pet['date_lost'] ?? 'Fecha desconocida',
                   rewardAmount: pet['reward_amount'] ?? '0.00',

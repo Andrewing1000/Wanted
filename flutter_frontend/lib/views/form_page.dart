@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:mascotas_flutter/widgets/form_widgets/PickerColor.dart';
 import 'dart:typed_data'; // Para Uint8List
 import '../widgets/form_widgets/image_picker.dart';
 import '../widgets/Maps/location_picker_field.dart';
@@ -82,9 +83,8 @@ class _PetFormScreenState extends State<PetFormScreen> {
                   controller: _speciesController,
                 ),
                 SizedBox(height: 16),
-                TextInputField(
-                  labelText: 'Color',
-                  controller: _colorController,
+                PickerColor(labelText: 'Color',
+                    colorController: _colorController
                 ),
                 SizedBox(height: 16),
                 TextInputField(
@@ -112,7 +112,7 @@ class _PetFormScreenState extends State<PetFormScreen> {
                 SizedBox(height: 16),
                 LocationPickerField(
                   initialLocation:  LatLng(-16.5038, -68.1193),
-                  onLocationPicked: _onLocationPicked,
+                  onLocationPicked: _onLocationPicked
                 ),
                 SizedBox(height: 16),
                 Row(
@@ -145,10 +145,10 @@ class _PetFormScreenState extends State<PetFormScreen> {
                             breed: _breedController.text.trim(),
                             color: _colorController.text.trim(),
                             description: _descriptionController.text.trim(),
-                            photo: base64Image, // Puede ser null si no se sube foto
+                            photo: base64Image,
                             dateLost: formattedDate,
-                            lastSeenLocation:
-                                '${_selectedLocation!.latitude},${_selectedLocation!.longitude}',
+                            lat: '${_selectedLocation!.latitude}',
+                            long:'${_selectedLocation!.longitude}',
                             rewardAmount: _rewardController.text.trim(),
                           );
 
