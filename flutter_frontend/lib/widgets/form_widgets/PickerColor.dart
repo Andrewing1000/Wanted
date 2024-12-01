@@ -18,6 +18,11 @@ class PickerColor extends StatefulWidget {
 class _PickerColorState extends State<PickerColor> {
   Color _selectedColor = Colors.blue; // Color inicial por defecto
 
+  /// Convierte un color a su representación hexadecimal
+  String _colorToHex(Color color) {
+    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
+  }
+
   void _openColorPickerDialog() {
     showDialog(
       context: context,
@@ -31,16 +36,17 @@ class _PickerColorState extends State<PickerColor> {
                 setState(() {
                   _selectedColor = color;
                 });
-                print('Color seleccionado: RGB(${color.red}, ${color.green}, ${color.blue})');
+
+                // Imprimir el color seleccionado en formato hexadecimal
+                print('Color seleccionado: ${_colorToHex(color)}');
               },
             ),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                // Actualizamos el controlador con el valor RGB
-                widget.colorController.text =
-                'RGB(${_selectedColor.red}, ${_selectedColor.green}, ${_selectedColor.blue})';
+                // Actualizamos el controlador con el valor hexadecimal
+                widget.colorController.text = _colorToHex(_selectedColor);
                 Navigator.of(context).pop();
               },
               child: const Text('Aceptar'),
