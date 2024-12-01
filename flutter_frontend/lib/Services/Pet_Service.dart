@@ -112,4 +112,46 @@ class Mascotas {
     }
   }
 
+
+
+
+
+  Future<List<Map<String, dynamic>>> fetchBreeds() async {
+    try {
+      final token = await Auth.getToken();
+      final response = await requestHandler.getRequest(
+        'post/breeds/',
+        headers: {'Authorization': 'Token $token'},
+      );
+
+      if (response is List) {
+        return response.map((item) => Map<String, dynamic>.from(item)).toList();
+      } else {
+        throw Exception('Formato de respuesta no válido para breeds.');
+      }
+    } catch (e) {
+      print('Error al obtener breeds: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchSpecies() async {
+    try {
+      final token = await Auth.getToken();
+      final response = await requestHandler.getRequest(
+        'post/species/',
+        headers: {'Authorization': 'Token $token'},
+      );
+
+      if (response is List) {
+        return response.map((item) => Map<String, dynamic>.from(item)).toList();
+      } else {
+        throw Exception('Formato de respuesta no válido para species.');
+      }
+    } catch (e) {
+      print('Error al obtener species: $e');
+      return [];
+    }
+  }
+
 }
