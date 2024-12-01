@@ -30,7 +30,7 @@ class PetPhotoSerializer(serializers.ModelSerializer):
         extra_kwargs = {'photo': {'required': True}}
 
 class LostPetPostSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all(), required=False)
+    user = serializers.PrimaryKeyRelatedField(read_only=True, required=False)
     species = serializers.PrimaryKeyRelatedField(queryset=Species.objects.all())
     breed = serializers.PrimaryKeyRelatedField(queryset=Breed.objects.all())
 
@@ -43,6 +43,11 @@ class LostPetPostSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'user', 'creation_date']
 
+    def to_representation(self, instance):
+        rep =  super().to_representation(instance)
+        rep['user'] = instance.user.email
+        return rep
+     
     def create(self, validated_data):
         return LostPetPost.objects.create(**validated_data)
 
@@ -55,7 +60,7 @@ class LostPetPostSerializer(serializers.ModelSerializer):
 
 
 class PetSightingPostSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all(), required=False)
+    user = serializers.PrimaryKeyRelatedField(read_only=True, required=False)
     species = serializers.PrimaryKeyRelatedField(queryset=Species.objects.all())
     breed = serializers.PrimaryKeyRelatedField(queryset=Breed.objects.all())
 
@@ -76,6 +81,10 @@ class PetSightingPostSerializer(serializers.ModelSerializer):
 
         return attrs
 
+    def to_representation(self, instance):
+        rep =  super().to_representation(instance)
+        rep['user'] = instance.user.email
+        return rep
 
     def create(self, validated_data):
         return PetSightingPost.objects.create(**validated_data)
