@@ -122,7 +122,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               itemBuilder: (context, index) {
                 final pet = filteredPetData[index];
                 return PetCard(
-                  username: pet['owner'] ?? 'Usuario desconocido',
+                  username: pet['email'] ?? 'Usuario desconocido',
                   petName: pet['pet_name'] ?? 'Autor desconocido',
                   status: pet['status'] ?? 'Desconocido',
                   imageUrl: pet['photo'] ?? 'assets/dummy.jpg',
