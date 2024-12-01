@@ -31,6 +31,7 @@ class _PickerColorState extends State<PickerColor> {
                 setState(() {
                   _selectedColor = color;
                 });
+                print('Color seleccionado: RGB(${color.red}, ${color.green}, ${color.blue})');
               },
             ),
           ),

@@ -21,8 +21,8 @@ class Mascotas {
 
   Future<String> registerPet({
     required String petName,
-    required String species,
-    required String breed,
+    required int species,
+    required int breed,
     required String color,
     required String description,
     required String? photo,

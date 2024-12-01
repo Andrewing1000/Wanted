@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:mascotas_flutter/widgets/form_widgets/PickerColor.dart';
 import 'dart:typed_data'; // Para Uint8List
+import '../widgets/DropDownField.dart';
 import '../widgets/form_widgets/image_picker.dart';
 import '../widgets/Maps/location_picker_field.dart';
 import '../widgets/text_input_field.dart';
@@ -18,8 +19,10 @@ class PetFormScreen extends StatefulWidget {
 }
 
 class _PetFormScreenState extends State<PetFormScreen> {
+  final Mascotas petService = Mascotas();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _breedController = TextEditingController();
+  int? _selectedBreedId;
+  int? _selectedSpecieId;
   final TextEditingController _colorController = TextEditingController();
   final TextEditingController _speciesController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -73,14 +76,25 @@ class _PetFormScreenState extends State<PetFormScreen> {
                   controller: _nameController,
                 ),
                 SizedBox(height: 16),
-                TextInputField(
-                  labelText: 'Raza',
-                  controller: _breedController,
+                DropdownField(
+                  labelText: "Raza",
+                  fetchItems: petService.fetchBreeds,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedBreedId = value;
+                    });
+                  },
                 ),
                 SizedBox(height: 16),
-                TextInputField(
-                  labelText: 'Especie',
-                  controller: _speciesController,
+
+                DropdownField(
+                  labelText: "Especie",
+                  fetchItems: petService.fetchSpecies,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedSpecieId = value;
+                    });
+                  },
                 ),
                 SizedBox(height: 16),
                 PickerColor(labelText: 'Color',
@@ -141,8 +155,8 @@ class _PetFormScreenState extends State<PetFormScreen> {
                           final petService = Mascotas();
                           final response = await petService.registerPet(
                             petName: _nameController.text.trim(),
-                            species: _speciesController.text.trim(),
-                            breed: _breedController.text.trim(),
+                            species: _selectedSpecieId!.toInt(),
+                            breed: _selectedBreedId!.toInt(),
                             color: _colorController.text.trim(),
                             description: _descriptionController.text.trim(),
                             photo: base64Image,
