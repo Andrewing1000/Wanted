@@ -2,61 +2,104 @@
 Serializers for the post app.
 """
 from rest_framework import serializers
-from post.models import LostPetPost, PetSightingPost, Comment, Message
+from post.models import LostPetPost, PetSightingPost, Comment, Message, Species, Breed, Post, PetPhoto
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
+from datetime import date
+from django.core.exceptions import ValidationError
 
+class SpeciesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Species
+        fields = ['id', 'value']
+
+class BreedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Breed
+        fields = ['id', 'value',]
+
+
+class PetPhotoSerializer(serializers.ModelSerializer):
+
+    post = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all(), required=True)
+
+    class Meta:
+        model = PetPhoto
+        fields = ['id', 'photo', 'post']
+        read_only_fields = ['id']
+        extra_kwargs = {'photo': {'required': True}}
 
 class LostPetPostSerializer(serializers.ModelSerializer):
-    """Serializer for lost pet posts."""
-
-    owner = serializers.ReadOnlyField(source='owner.email')
+    user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all(), required=False)
+    species = serializers.PrimaryKeyRelatedField(queryset=Species.objects.all())
+    breed = serializers.PrimaryKeyRelatedField(queryset=Breed.objects.all())
 
     class Meta:
         model = LostPetPost
         fields = [
-            'id', 'owner', 'pet_name', 'species', 'breed', 'color',
-            'description', 'photo', 'date_lost', 'last_seen_location',
-            'reward_amount', 'date_created',
+            'id', 'user', 'pet_name', 'species', 'breed', 'color',
+            'description', 'date_lost', 'latitude', 'longitude',
+            'reward_amount', 'creation_date',
         ]
-        read_only_fields = ['id', 'owner', 'date_created']
+        read_only_fields = ['id', 'user', 'creation_date']
+
+    def create(self, validated_data):
+        return LostPetPost.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        instance.save()
+        return instance
+
 
 
 class PetSightingPostSerializer(serializers.ModelSerializer):
-    """Serializer for pet sighting posts."""
-
-    reporter = serializers.ReadOnlyField(source='reporter.email')
-    lost_pet_post = serializers.PrimaryKeyRelatedField(
-        queryset=LostPetPost.objects.all(),
-        required=False,
-        allow_null=True,
-    )
+    user = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all(), required=False)
+    species = serializers.PrimaryKeyRelatedField(queryset=Species.objects.all())
+    breed = serializers.PrimaryKeyRelatedField(queryset=Breed.objects.all())
 
     class Meta:
         model = PetSightingPost
         fields = [
-            'id', 'reporter', 'lost_pet_post', 'species', 'color',
-            'description', 'photo', 'date_sighted', 'location', 'date_created',
+            'id', 'user', 'species', 'breed', 'color',
+            'description', 'date_sighted', 'latitude', 'longitude', 'creation_date',
         ]
-        read_only_fields = ['id', 'reporter', 'date_created']
+        read_only_fields = ['id', 'user', 'creation_date']
+
+    def validate(self, attrs):
+        raw_date = attrs.get('date_sighted', None)
+        if raw_date and raw_date > date.today():
+            raise serializers.ValidationError(
+                "Fecha de avistamiento: No puede estar en el futuro."
+            )
+
+        return attrs
+
+
+    def create(self, validated_data):
+        return PetSightingPost.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        instance.save()
+        return instance
 
 
 class CommentSerializer(serializers.ModelSerializer):
     """Serializer for comments."""
 
-    user = serializers.ReadOnlyField(source='user.email')
     replies = serializers.SerializerMethodField()
-    content_type = serializers.CharField(write_only=True, required=False)
-    object_id = serializers.IntegerField(write_only=True, required=False)
-    parent_id = serializers.IntegerField(write_only=True, required=False)
+    parent = serializers.PrimaryKeyRelatedField(queryset=Comment.objects.all(), required=False)
+    post = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all(), required=False)
 
     class Meta:
         model = Comment
         fields = [
-            'id', 'user', 'content', 'date_created', 'content_type', 'object_id',
-            'parent_id', 'replies',
+            'id', 'user', 'content', 'creation_date',  'parent', 'replies', 'post',
         ]
-        read_only_fields = ['id', 'user', 'date_created', 'replies']
+        read_only_fields = ['id', 'user', 'creation_date', 'replies']
 
     def get_replies(self, obj):
         if obj.replies.exists():
@@ -64,55 +107,52 @@ class CommentSerializer(serializers.ModelSerializer):
         return []
 
     def validate(self, attrs):
-        """Ensure that the comment is associated with a valid post or parent comment."""
-        content_type = attrs.get('content_type')
-        object_id = attrs.get('object_id')
-        parent_id = attrs.get('parent_id')
+        parent = attrs.get('parent', None)
+        post = attrs.get('post', None)
 
-        if parent_id:
-            if content_type or object_id:
-                raise serializers.ValidationError("Provide either 'parent_id' or 'content_type' and 'object_id', not both.")
-            try:
-                parent_comment = Comment.objects.get(id=parent_id)
-                attrs['parent'] = parent_comment
-            except Comment.DoesNotExist:
-                raise serializers.ValidationError("Parent comment does not exist.")
-        else:
-            if not content_type or not object_id:
-                raise serializers.ValidationError("Provide 'content_type' and 'object_id' for commenting on a post.")
-            try:
-                model = ContentType.objects.get(model=content_type).model_class()
-                if not model.objects.filter(id=object_id).exists():
-                    raise serializers.ValidationError("Object does not exist.")
-            except ContentType.DoesNotExist:
-                raise serializers.ValidationError("Invalid content type.")
+        if parent and post:
+            raise serializers.ValidationError("Comment is either a root or a reply")
+        
+        if parent:
+            if not Comment.objects.filter(id=parent.id).first:
+                raise serializers.ValidationError("Parent commment could not be found")
+            
+        if post:
+            if not Post.objects.filter(id=post.id).first():
+                raise serializers.ValidationError("Post could not be found")
+
         return attrs
-
+    
     def create(self, validated_data):
+        user = validated_data.pop('user', None)
         parent = validated_data.pop('parent', None)
-        content_type = validated_data.pop('content_type', None)
-        object_id = validated_data.pop('object_id', None)
+        post = validated_data.pop('post', None)
+
+        if not parent and not post:
+            raise ValidationError("Either a parent or a post is nedded")
 
         if parent:
             comment = Comment.objects.create(
-                user=self.context['request'].user,
+                user=user,
                 parent=parent,
                 **validated_data
             )
         else:
-            content_type_instance = ContentType.objects.get(model=content_type)
             comment = Comment.objects.create(
-                user=self.context['request'].user,
-                content_type=content_type_instance,
-                object_id=object_id,
+                user=user,
+                post=post,
                 **validated_data
             )
         return comment
+    
+    def update(self, instance, validated_data):
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        instance.save()
+        return instance
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    """Serializer for messages between users."""
-
     sender = serializers.ReadOnlyField(source='sender.email')
     receiver = serializers.EmailField()
 
@@ -131,9 +171,14 @@ class MessageSerializer(serializers.ModelSerializer):
         except User.DoesNotExist:
             raise serializers.ValidationError("Receiver does not exist.")
 
-        message = Message.objects.create(
+        return Message.objects.create(
             sender=self.context['request'].user,
             receiver=receiver,
             **validated_data
         )
-        return message
+
+    def update(self, instance, validated_data):
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        instance.save()
+        return instance
