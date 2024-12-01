@@ -3,7 +3,7 @@
       <h1>Iniciar Sesión</h1>
       <p>Bienvenido de nuevo. Por favor, ingresa tus credenciales para acceder a tu cuenta.</p>
       
-      <form @submit.prevent="handleLogin">
+      <form @submit.prevent="onLogin">
         <div class="form-group">
           <label for="email">Correo Electrónico:</label>
           <input type="email" id="email" v-model="email" required />
@@ -22,6 +22,7 @@
   </template>
   
   <script>
+  import { handleLogin } from "@/models/LoginModel.mjs"
   export default {
     data() {
       return {
@@ -30,10 +31,8 @@
       };
     },
     methods: {
-      handleLogin() {
-        // Lógica para manejar el inicio de sesión
-        alert(`Inicio de sesión exitoso para: ${this.email}`);
-        // Aquí puedes agregar más lógica, como verificar las credenciales
+      onLogin() {
+        handleLogin(this.email, this.password);
       }
     }
   };

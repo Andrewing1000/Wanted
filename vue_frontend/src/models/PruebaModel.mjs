@@ -11,7 +11,7 @@ let response = await axios.post(url+'/user/token/',admin)
 let tokenS = response.data.token
 
 console.log(tokenS);
-
+  
 
 let config = {
   headers: {
@@ -40,5 +40,5 @@ let xd = await axios.get(url+'/user/me/',config)
 // axios.post(url+'/post/lost-pets/'+id+'/',datos,config)//editar
 // axios.post(url+'/post/lost-pets/'+'/',datos,config)//publicar
 // axios.delete(url+'/post/lost-pets/'+id+'/',config)//eliminar
-console.log(xd2);
+console.log(xd);
 

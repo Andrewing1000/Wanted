@@ -8,6 +8,11 @@
           <label for="name">Nombre Completo:</label>
           <input type="text" id="name" v-model="name" required />
         </div>
+
+        <div class="form-group">
+          <label for="number">Numero de telefono:</label>
+          <input type="number" id="number" v-model="number" required />
+        </div>
   
         <div class="form-group">
           <label for="email">Correo Electrónico:</label>
@@ -32,11 +37,13 @@
   </template>
   
   <script>
+  import {handleRegister} from "@/models/RegisterModel.mjs"
   export default {
     data() {
       return {
         name: '',
         email: '',
+        number: '',
         password: '',
         confirmPassword: ''
       };
@@ -44,7 +51,7 @@
     methods: {
       handleSubmit() {
         // Lógica para manejar el registro
-        alert(`Usuario registrado: ${this.name}`);
+        handleRegister(this.email,this.password,this.name,this.number,this.confirmPassword)
         // Aquí puedes agregar más lógica, como enviar los datos a un servidor
       }
     }
