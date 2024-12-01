@@ -11,7 +11,6 @@ from rest_framework import serializers
 from rest_framework.exceptions import APIException
 
 from django.contrib.auth.models import AnonymousUser
-from core.models import Session
 
 
 class NotValidRole(APIException):
@@ -79,31 +78,20 @@ class AuthTokenSerializer(serializers.Serializer):
         user = get_user_model().objects.filter(email=email)
 
         if not user.exists():
-            print("No hay")
             attrs['user'] = AnonymousUser()
             return attrs
 
         user = authenticate(
-            request=self.context.get('request'),
+            request=self.context['request'],
             username=email,
             password=password,
         )
+
         if not user:
-            print("No correcto")
             return attrs
 
         attrs['user'] = user
         return attrs
-
-
-class SessionSerializer(serializers.ModelSerializer):
-    """Serializer for session."""
-
-    class Meta:
-        model = Session
-        fields = ['id', 'login_time', 'logout_time']
-        read_only_fields = ['id', 'login_time', 'logout_time']
-
 
 class HealthCheckSerializer(serializers.Serializer):
     status = serializers.CharField()
