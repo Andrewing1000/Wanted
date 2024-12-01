@@ -62,6 +62,10 @@ class LostPetPostViewSet(viewsets.ModelViewSet):
             return PetPhotoSerializer
         return super().get_serializer_class()
 
+    # @action(methods=['GET'], detail=False, url_path='near')
+    # def find_near(self, request, pk=None):
+    #     id_coordinates = LostPetPost.objects.values_list()
+
     @action(methods=['POST', 'PUT', 'PATCH'], detail=True, url_path='photos/upload')
     def upload_photo(self, request, pk=None):
         instance = self.get_object()
