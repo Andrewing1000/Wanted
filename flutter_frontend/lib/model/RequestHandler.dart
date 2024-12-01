@@ -115,6 +115,49 @@ class RequestHandler {
     }
   }
 
+  Future<dynamic> multipartPostRequest(String endpoint,
+      {Map<String, String>? data,
+        String? filePath,
+        String? fileField,
+        Map<String, String>? headers}) async {
+    try {
+      final uri = Uri.parse('$baseUrl$endpoint');
+      final request = http.MultipartRequest('POST', uri);
+
+      // Agregar headers
+      if (headers != null) {
+        request.headers.addAll(headers);
+      }
+
+      // Agregar datos
+      if (data != null) {
+        request.fields.addAll(data);
+      }
+
+      // Agregar archivo si se proporciona
+      if (filePath != null && fileField != null) {
+        request.files.add(await http.MultipartFile.fromPath(fileField, filePath));
+      }
+
+      // Enviar solicitud
+      final response = await request.send();
+
+      // Manejar respuesta
+      final responseBody = await response.stream.bytesToString();
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(responseBody);
+      } else {
+        throw Exception('Error: ${response.statusCode} - ${responseBody.trim()}');
+      }
+    } catch (e) {
+      _handleError(e);
+    }
+  }
+
+
+
+
+
   // Método privado para manejar la respuesta
   dynamic _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {

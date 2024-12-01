@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:mascotas_flutter/widgets/form_widgets/PickerColor.dart';
 import 'dart:typed_data'; // Para Uint8List
 import '../widgets/form_widgets/image_picker.dart';
 import '../widgets/Maps/location_picker_field.dart';
@@ -82,9 +83,8 @@ class _PetFormScreenState extends State<PetFormScreen> {
                   controller: _speciesController,
                 ),
                 SizedBox(height: 16),
-                TextInputField(
-                  labelText: 'Color',
-                  controller: _colorController,
+                PickerColor(labelText: 'Color',
+                    colorController: _colorController
                 ),
                 SizedBox(height: 16),
                 TextInputField(
@@ -112,7 +112,7 @@ class _PetFormScreenState extends State<PetFormScreen> {
                 SizedBox(height: 16),
                 LocationPickerField(
                   initialLocation:  LatLng(-16.5038, -68.1193),
-                  onLocationPicked: _onLocationPicked,
+                  onLocationPicked: _onLocationPicked
                 ),
                 SizedBox(height: 16),
                 Row(
@@ -121,7 +121,6 @@ class _PetFormScreenState extends State<PetFormScreen> {
                     StartButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate() &&
-                            _selectedImage != null &&
                             _selectedLocation != null &&
                             _selectedDate != null) {
                           // Mostrar mensaje de guardado
@@ -129,8 +128,10 @@ class _PetFormScreenState extends State<PetFormScreen> {
                             SnackBar(content: Text('Guardando mascota...')),
                           );
 
-                          // Convertir la imagen a base64
-                          final String base64Image = base64Encode(_selectedImage!);
+                          // Si no hay imagen seleccionada, se asigna null
+                          final String? base64Image = _selectedImage != null
+                              ? base64Encode(_selectedImage!)
+                              : null;
 
                           // Formatear la fecha a `YYYY-MM-DD`
                           final String formattedDate =
@@ -146,16 +147,17 @@ class _PetFormScreenState extends State<PetFormScreen> {
                             description: _descriptionController.text.trim(),
                             photo: base64Image,
                             dateLost: formattedDate,
-                            lastSeenLocation:
-                            '${_selectedLocation!.latitude},${_selectedLocation!.longitude}',
+                            lat: '${_selectedLocation!.latitude}',
+                            long:'${_selectedLocation!.longitude}',
                             rewardAmount: _rewardController.text.trim(),
                           );
 
-                          // Mostrar resultado al usuario
+                          // Mostrar respuesta del servidor al usuario
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(response)),
                           );
                         } else {
+                          // Mostrar mensaje de error si no se completaron todos los campos
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Por favor, completa todos los campos requeridos.'),

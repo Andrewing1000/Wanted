@@ -22,7 +22,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_filterPets);
-    _fetchPets();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchPets(); // Refresca los datos cuando la página se carga
   }
 
   @override
@@ -51,7 +56,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           break;
         case 2:
           filteredPetData =
-              petData.where((pet) => pet['status'] == 'Encontrado').toList();
+              petData.where((pet) => pet['status'] == 'Visto').toList();
           break;
       }
     });
@@ -171,7 +176,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TabBarWidget(tabController: _tabController),
+          TabBarWidget(tabController: _tabController), // TabBar personalizado
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
@@ -191,10 +196,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               itemBuilder: (context, index) {
                 final pet = filteredPetData[index];
                 return PetCard(
-                  username: pet['username'] ?? 'Usuario desconocido',
-                  petName: pet['pet_name'] ?? 'Mascota desconocida',
+                  username: pet['email'] ?? 'Usuario desconocido',
+                  petName: pet['pet_name'] ?? 'Autor desconocido',
                   status: pet['status'] ?? 'Desconocido',
-                  imageUrl: pet['photo'] ?? 'assets/placeholder.png',
+                  imageUrl: pet['photo'] ?? 'assets/dummy.jpg',
+                  dateLost: pet['date_lost'] ?? 'Fecha desconocida',
+                  rewardAmount: pet['reward_amount'] ?? '0.00',
                   onTap: () => showPetDetailsModal(context, pet),
 
                 );

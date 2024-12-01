@@ -27,11 +27,13 @@ class Mascotas {
     required String description,
     required String? photo,
     required String dateLost,
-    required String lastSeenLocation,
+    required String lat,
+    required String long,
     required String rewardAmount,
   }) async {
     try {
       final token = await Auth.getToken();
+      // Paso 1: Registrar la mascota sin foto
       final response = await requestHandler.postRequest(
         'post/lost-pets/',
         data: {
@@ -40,9 +42,9 @@ class Mascotas {
           "breed": breed,
           "color": color,
           "description": description,
-          "photo": photo,
           "date_lost": dateLost,
-          "last_seen_location": lastSeenLocation,
+          "latitude": lat,
+          "longitude": long,
           "reward_amount": rewardAmount,
         },
         headers: {'Authorization': 'Token $token'},
@@ -50,7 +52,19 @@ class Mascotas {
 
       // Verificar respuesta
       if (response != null && response['id'] != null) {
-        return 'Mascota registrada exitosamente';
+        final int petId = response['id'];
+
+
+        if (photo != null) {
+          final uploadResponse = await uploadPetPhoto(petId: petId, photoPath: photo);
+
+          // Verificar si la foto se subió exitosamente
+          if (uploadResponse != "Foto subida exitosamente") {
+            throw Exception(uploadResponse);
+          }
+        }
+
+        return 'Mascota registrada exitosamente con foto';
       } else {
         throw Exception('Error al registrar la mascota. Formato no válido.');
       }
@@ -66,4 +80,78 @@ class Mascotas {
       return 'Ocurrió un error inesperado. ${e.toString()}';
     }
   }
+
+
+
+  Future<String> uploadPetPhoto({
+    required int petId,
+    required String photoPath,
+
+  }) async {
+    final token = await Auth.getToken();
+    try {
+      final response = await requestHandler.multipartPostRequest(
+        'post/lost-pets/$petId/photos/upload/',
+        data: {
+          "post": petId.toString(),
+        },
+        filePath: photoPath,
+        fileField: "photo",
+        headers: {
+          'Authorization': 'Token $token',
+        },
+      );
+
+      if (response != null && response['photo'] != null) {
+        return 'Foto subida exitosamente';
+      } else {
+        throw Exception('Error al subir la foto. Formato no válido.');
+      }
+    } catch (e) {
+      return 'Error al subir la foto: ${e.toString()}';
+    }
+  }
+
+
+
+
+
+  Future<List<Map<String, dynamic>>> fetchBreeds() async {
+    try {
+      final token = await Auth.getToken();
+      final response = await requestHandler.getRequest(
+        'post/breeds/',
+        headers: {'Authorization': 'Token $token'},
+      );
+
+      if (response is List) {
+        return response.map((item) => Map<String, dynamic>.from(item)).toList();
+      } else {
+        throw Exception('Formato de respuesta no válido para breeds.');
+      }
+    } catch (e) {
+      print('Error al obtener breeds: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchSpecies() async {
+    try {
+      final token = await Auth.getToken();
+      final response = await requestHandler.getRequest(
+        'post/species/',
+        headers: {'Authorization': 'Token $token'},
+      );
+
+      if (response is List) {
+        return response.map((item) => Map<String, dynamic>.from(item)).toList();
+      } else {
+        throw Exception('Formato de respuesta no válido para species.');
+      }
+    } catch (e) {
+      print('Error al obtener species: $e');
+      return [];
+    }
+  }
+
 }
