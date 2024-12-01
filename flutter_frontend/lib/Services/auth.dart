@@ -15,6 +15,7 @@ class AuthService{
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', login['token']);
         await prefs.setString('userName', login['name']);
+        await prefs.setString('email', login['email']);
         return true;
       } else {
         return false;
@@ -78,6 +79,12 @@ Future<String> registerCreate(String correo,String contrasenia,String nombre, St
   Future<String?> getUserName() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('userName');
+  }
+
+
+  Future<String?> getUserEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('email');
   }
 
   /// Obtener el token almacenado
