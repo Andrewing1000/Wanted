@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mascotas_flutter/Services/Pets_Me.dart';
 import '../login.dart';
 import '../Services/auth.dart';
 import 'home_page.dart';
@@ -76,7 +77,8 @@ class _ManagerScreenState extends State<ManagerScreen> {
         index: _currentIndex,
         children: [
           HomePage(),
-          WidgetsTestScreen(),
+          //WidgetsTestScreen(),
+          PetsMeScreen(),
           //favoritos();
           PetFormScreen(),
           Center(child: Text('Avistamientos Creados')),

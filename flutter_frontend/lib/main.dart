@@ -15,29 +15,29 @@ void main() async {
   runApp(MyApp());
 }
 
-//Future<void> perro() async{
-//  final reponse = RequestHandler();
-//  final servidor = AuthService();
-//  servidor.Login('andres@hino.com', 'andres');
-//  final token = await servidor.getToken();
+Future<void> perro() async{
+ final reponse = RequestHandler();
+ final servidor = AuthService();
+ servidor.Login('andres@hino.com', 'andres');
+ final token = await servidor.getToken();
 
-//  var perro = reponse.postRequest('post/lost-pets/',
-//    data: {
-//      "pet_name": "tita",
-//      "species": "albino",
-//      "breed": "pequines",
-//      "color": "blanco",
-//     "description": "enano bonito",
+ var perro = reponse.postRequest('post/lost-pets/',
+   data: {
+     "pet_name": "tita",
+     "species": "albino",
+     "breed": "pequines",
+     "color": "blanco",
+    "description": "enano bonito",
 
-//      "photo": null,
-//      "date_lost": "2024-11-25",
-//      "last_seen_location": "12,12",
-//      "reward_amount": "400",
-//    },
-//    headers: {'Authorization': 'Token $token'},
-//  );
+     "photo": null,
+     "date_lost": "2024-11-25",
+     "last_seen_location": "12,12",
+     "reward_amount": "400",
+   },
+   headers: {'Authorization': 'Token $token'},
+ );
 
-//}
+}
 
 Future<void> checkServerConnection() async {
   final requestHandler = RequestHandler();
