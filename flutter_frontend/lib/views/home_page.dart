@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../Services/PetFind.dart';
 import '../widgets/HomeWidget/tab_bar_widget.dart';
 import '../widgets/petDetailsModal.dart';
 import '../widgets/pet_card.dart';
 import '../services/Pet_Service.dart';
-import '../services/PetFind.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -17,18 +17,16 @@ class HomePageState extends State<HomePage> with SingleTickerProviderStateMixin 
   final Mascotas petService = Mascotas();
   final PetFindService petFindService = PetFindService();
 
-  List<Map<String, dynamic>> petData = []; // Todas las mascotas perdidas
-  List<Map<String, dynamic>> sightingsData = []; // Todas las mascotas vistas
-  List<Map<String, dynamic>> filteredPetData = []; // Mascotas filtradas por estado
+  List<Map<String, dynamic>> petData = []; // Mascotas perdidas
+  List<Map<String, dynamic>> sightingsData = []; // Avistamientos
+  List<Map<String, dynamic>> filteredPetData = []; // Mascotas filtradas
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     tabController = TabController(length: 3, vsync: this); // Inicio, Perdidos, Vistos
-    tabController.addListener(() {
-      filterPets(); // Filtrar mascotas según la pestaña activa
-    });
+    tabController.addListener(filterPets); // Filtrar datos al cambiar de pestaña
     fetchInitialData(); // Cargar datos iniciales
   }
 
@@ -38,23 +36,24 @@ class HomePageState extends State<HomePage> with SingleTickerProviderStateMixin 
     super.dispose();
   }
 
+  /// Cargar datos iniciales
   Future<void> fetchInitialData() async {
     setState(() {
       isLoading = true;
     });
 
     try {
-      final lostPets = await petService.fetchLostPets(); // Mascotas perdidas
-      final sightings = await petFindService.fetchPetSightings(); // Mascotas vistas
+      final lostPets = await petService.fetchLostPets();
+      final sightings = await petFindService.fetchEnrichedSightings();
 
       setState(() {
         petData = lostPets.map((pet) {
-          pet['status'] = 'Perdido';
+          pet['status'] = 'Perdido'; // Asignar estado "Perdido"
           return pet;
         }).toList();
 
         sightingsData = sightings.map((sighting) {
-          sighting['status'] = 'Visto';
+          sighting['status'] = 'Visto'; // Asignar estado "Visto"
           return sighting;
         }).toList();
 
@@ -69,16 +68,17 @@ class HomePageState extends State<HomePage> with SingleTickerProviderStateMixin 
     }
   }
 
+  /// Cargar mascotas perdidas
   Future<void> fetchLostPets() async {
     setState(() {
       isLoading = true;
     });
 
     try {
-      final data = await petService.fetchLostPets();
+      final lostPets = await petService.fetchLostPets();
       setState(() {
-        petData = data.map((pet) {
-          pet['status'] = 'Perdido';
+        petData = lostPets.map((pet) {
+          pet['status'] = 'Perdido'; // Asignar estado "Perdido"
           return pet;
         }).toList();
 
@@ -95,16 +95,17 @@ class HomePageState extends State<HomePage> with SingleTickerProviderStateMixin 
     }
   }
 
+  /// Cargar avistamientos
   Future<void> fetchSightings() async {
     setState(() {
       isLoading = true;
     });
 
     try {
-      final data = await petFindService.fetchPetSightings();
+      final sightings = await petFindService.fetchEnrichedSightings();
       setState(() {
-        sightingsData = data.map((sighting) {
-          sighting['status'] = 'Visto';
+        sightingsData = sightings.map((sighting) {
+          sighting['status'] = 'Visto'; // Asignar estado "Visto"
           return sighting;
         }).toList();
 
@@ -121,30 +122,26 @@ class HomePageState extends State<HomePage> with SingleTickerProviderStateMixin 
     }
   }
 
+  /// Filtrar datos según la pestaña seleccionada
   void filterPets() {
     setState(() {
       switch (tabController.index) {
-        case 0: // Inicio: Mascotas perdidas y vistas
+        case 0: // Inicio: Todas las mascotas (perdidas y vistas)
           filteredPetData = List.from(petData + sightingsData);
           break;
         case 1: // Perdidos: Solo mascotas perdidas
-          if (petData.isEmpty) {
-            fetchLostPets(); // Si está vacío, cargar desde el servicio
-          } else {
-            filteredPetData = List.from(petData);
-          }
+          filteredPetData = petData.isNotEmpty ? List.from(petData) : [];
+          if (filteredPetData.isEmpty) fetchLostPets();
           break;
-        case 2: // Vistos: Solo mascotas vistas
-          if (sightingsData.isEmpty) {
-            fetchSightings(); // Si está vacío, cargar desde el servicio
-          } else {
-            filteredPetData = List.from(sightingsData);
-          }
+        case 2: // Vistos: Solo avistamientos
+          filteredPetData = sightingsData.isNotEmpty ? List.from(sightingsData) : [];
+          if (filteredPetData.isEmpty) fetchSightings();
           break;
       }
     });
   }
 
+  /// Mostrar detalles de la mascota
   void showPetDetailsModal(BuildContext context, Map<String, dynamic> pet) {
     showDialog(
       context: context,
@@ -170,15 +167,19 @@ class HomePageState extends State<HomePage> with SingleTickerProviderStateMixin 
           ),
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : RefreshIndicator(
               onRefresh: () async {
-                if (tabController.index == 0) {
-                  await fetchInitialData(); // Actualizar todo en "Inicio"
-                } else if (tabController.index == 1) {
-                  await fetchLostPets(); // Actualizar "Perdidos"
-                } else if (tabController.index == 2) {
-                  await fetchSightings(); // Actualizar "Vistos"
+                switch (tabController.index) {
+                  case 0:
+                    await fetchInitialData();
+                    break;
+                  case 1:
+                    await fetchLostPets();
+                    break;
+                  case 2:
+                    await fetchSightings();
+                    break;
                 }
               },
               child: filteredPetData.isEmpty
@@ -186,8 +187,8 @@ class HomePageState extends State<HomePage> with SingleTickerProviderStateMixin 
                 children: [
                   Center(
                     child: Padding(
-                      padding: EdgeInsets.only(top: 100),
-                      child: Text(
+                      padding: const EdgeInsets.only(top: 100),
+                      child: const Text(
                         "No hay información disponible.",
                         style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),

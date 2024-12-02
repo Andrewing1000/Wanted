@@ -6,21 +6,27 @@ import 'dart:typed_data';
 class Mascotas {
   final RequestHandler requestHandler = RequestHandler();
   final AuthService Auth = AuthService();
+
+  /// Obtener todas las mascotas perdidas
   Future<List<Map<String, dynamic>>> fetchLostPets() async {
     try {
       final token = await Auth.getToken();
-      final response = await requestHandler.getRequest('post/lost-pets/',
-          headers: {'Authorization': 'Token $token'});
+      final response = await requestHandler.getRequest(
+        'post/lost-pets/',
+        headers: {'Authorization': 'Token $token'},
+      );
+
       if (response is List) {
         return response.map((item) => Map<String, dynamic>.from(item)).toList();
       } else {
-        throw Exception('Formato de respuesta no válido');
+        throw Exception('Formato de respuesta no válido.');
       }
     } catch (e) {
+      print('Error al obtener mascotas perdidas: $e');
       return [];
     }
   }
-
+//crear mascota perdida
   Future<String> registerPet({
     required String petName,
     required int species,
@@ -35,7 +41,6 @@ class Mascotas {
   }) async {
     try {
       final token = await Auth.getToken();
-      // Paso 1: Registrar la mascota sin foto
       final response = await requestHandler.postRequest(
         'post/lost-pets/',
         data: {
@@ -52,7 +57,6 @@ class Mascotas {
         headers: {'Authorization': 'Token $token'},
       );
 
-      // Verificar respuesta
       if (response != null && response['id'] != null) {
         final int petId = response['id'];
 
@@ -81,7 +85,27 @@ class Mascotas {
     }
   }
 
+  /// Obtener mascota por ID
+  Future<Map<String, dynamic>?> fetchPetById(int petId) async {
+    try {
+      final token = await Auth.getToken();
+      final response = await requestHandler.getRequest(
+        'post/lost-pets/$petId/',
+        headers: {'Authorization': 'Token $token'},
+      );
 
+      if (response is Map<String, dynamic>) {
+        return response;
+      } else {
+        throw Exception('Formato de respuesta no válido.');
+      }
+    } catch (e) {
+      print('Error al obtener mascota por ID: $e');
+      return null;
+    }
+  }
+
+  /// Eliminar una mascota perdida
   Future<String> deleteLostPet(int petId) async {
     try {
       final token = await Auth.getToken();
@@ -95,7 +119,7 @@ class Mascotas {
       return 'Error al eliminar mascota perdida: ${e.toString()}';
     }
   }
-
+//actualizar Mascota
   Future<String> updatePet({ required int petId, required String petName, required int species, required int breed, required String color, required String description,
     String? photo,
     required String dateLost,
@@ -140,7 +164,7 @@ class Mascotas {
       throw Exception("Error al actualizar la mascota");
     }
   }
-
+//subir foto
   Future<String> uploadPetPhoto({
     required int petId,
     required Uint8List photoBytes,
@@ -173,10 +197,7 @@ class Mascotas {
     }
   }
 
-
-
-
-
+  //
   Future<List<Map<String, dynamic>>> fetchBreeds() async {
     try {
       final token = await Auth.getToken();
@@ -199,7 +220,7 @@ class Mascotas {
   Future<List<Map<String, dynamic>>> fetchSpecies() async {
     try {
       final token = await Auth.getToken();
-      
+
       final response = await requestHandler.getRequest(
         'post/species/',
         headers: {'Authorization': 'Token $token'},
@@ -215,5 +236,4 @@ class Mascotas {
       return [];
     }
   }
-
 }
