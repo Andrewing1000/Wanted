@@ -1,10 +1,6 @@
 <template>
     <div class="profile-page">
       <h1>Editar Perfil</h1>
-      <div class="profile-header">
-        <img :src="user.profilePhoto" alt="Foto de Perfil" class="profile-photo" />
-        <button @click="changePhoto" class="change-photo-btn">Cambiar Foto</button>
-      </div>
       <form @submit.prevent="saveProfile">
         <div class="form-group">
           <label for="name">Nombre</label>
@@ -31,37 +27,10 @@
           <input 
             type="text" 
             id="phone" 
-            v-model="user.phone" 
+            v-model="user.phone_number" 
             placeholder="Ingrese su número de teléfono" 
             required
           />
-        </div>
-        <div class="form-group">
-          <label for="address">Dirección</label>
-          <input 
-            type="text" 
-            id="address" 
-            v-model="user.address" 
-            placeholder="Ingrese su dirección completa" 
-          />
-        </div>
-        <div class="form-group">
-          <label for="birthdate">Fecha de Nacimiento</label>
-          <input 
-            type="date" 
-            id="birthdate" 
-            v-model="user.birthdate" 
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="bio">Biografía</label>
-          <textarea 
-            id="bio" 
-            v-model="user.bio" 
-            placeholder="Escribe algo sobre ti" 
-            rows="3"
-          ></textarea>
         </div>
         <button type="submit">Guardar Cambios</button>
       </form>
@@ -69,17 +38,28 @@
   </template>
   
   <script>
+  import axios from "axios";
+
+  const url = "http://localhost:8080";
+  const tokenU = localStorage.getItem("UserToken");
+
+  const config = {
+    headers: {
+      Authorization: "Token " + tokenU,
+    },
+  };
   export default {
+  created () {
+    this.begin();
+  },
     data() {
       return {
         user: {
-          name: "Juan Pérez",
-          email: "juan.perez@example.com",
-          phone: "123-456-7890",
-          address: "Av. Siempre Viva 742",
-          birthdate: "1990-01-01",
-          bio: "Amante de los animales y defensor de los derechos de las mascotas.",
-          profilePhoto: require('@/assets/profile.jpg'), // Foto usando require
+          name: '',
+          email: '',
+          phone_number: '',
+          is_active: '',
+          is_staff: '',
         },
       };
     },
@@ -89,6 +69,13 @@
       },
       changePhoto() {
         alert("Funcionalidad para cambiar foto aún no implementada.");
+      },
+      begin(){
+        axios.get(url+'/user/me/',config).then((response) => {
+            this.user = response.data;
+            console.log(this.user);
+            
+        });
       },
     },
   };

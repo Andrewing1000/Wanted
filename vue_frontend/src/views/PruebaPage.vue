@@ -1,65 +1,57 @@
 <template>
   <div>
-    <!-- Contenedor de la galería -->
-    <div class="gallery">
-      <div v-for="image in images" :key="image.id" class="gallery-item">
-        <img :src="image.photo" :alt="'Image for post ' + image.post" />
-      </div>
-    </div>
+    <input type="file" @change="onFileChange" />
+    <button @click="uploadImage">Upload Image</button>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+const tokenU = localStorage.getItem("UserToken");
 
 export default {
   props: {
     postId: {
       type: Number,
-      required: true, // Se pasa como prop para filtrar por post específico
+      required: true, // Se pasa como prop para reemplazar {id}
     },
   },
   data() {
     return {
-      idperro: null,
-      images: [], // Lista de imágenes
+      file: null, // Archivo seleccionado
     };
   },
-  methods: {  
-    async fetchImages() {
+  methods: {
+    onFileChange(event) {
+      this.file = event.target.files[0]; // Guarda el archivo seleccionado
+    },
+    async uploadImage() {
+      if (!this.file) {
+        alert("Please select a file!");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('photo', this.file); // Adjunta el archivo
+      formData.append('post', 1); // Incluye el ID del post
+
       try {
-        const response = await axios.get(`http://localhost:8080/post/lost-pets/${idperro}/photos/`);
-        this.images = response.data; // Guarda las imágenes obtenidas del servidor
+        const response = await axios.post(
+          `http://localhost:8080/post/pet-sightings/${5}/photos/upload/`,
+          formData,
+          {
+            headers: {
+              'Authorization': 'Token ' + tokenU,
+            },
+          }
+        );
+        console.log(response.data);
+        alert('Image uploaded successfully!');
       } catch (error) {
         console.error(error);
-        alert('Error fetching images');
+        alert('Error uploading image');
       }
     },
   },
-  mounted() {
-    this.fetchImages(); // Carga las imágenes cuando el componente se monta
-  },
 };
 </script>
-
-<style>
-/* Estilo básico para la galería */
-.gallery {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.gallery-item {
-  flex: 1 1 calc(25% - 10px); /* Cuatro columnas con espacio */
-  box-sizing: border-box;
-}
-
-.gallery-item img {
-  width: 100%;
-  height: auto;
-  border-radius: 5px;
-  object-fit: cover;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-</style>
