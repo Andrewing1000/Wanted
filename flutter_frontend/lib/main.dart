@@ -39,22 +39,22 @@ Future<void> checkServerConnection() async {
 
 
 
-Future<void> Registro() async{
-  final request = RequestHandler();
-  try{
-    var usuario = await request.postRequest('user/create/',
-        data :{
-          "email": "andres@hino.com",
-          "password": "andres",
-          "name": "Andres Hino",
-          "phone_number": "7884262",
-          "is_active": true,
-          "is_staff": true,}
-    );
-  }catch(e){
-    print(e.toString());
-  }
-}
+// Future<void> Registro() async{
+//   final request = RequestHandler();
+//   try{
+//     var usuario = await request.postRequest('user/create/',
+//         data :{
+//           "email": "andres@hino.com",
+//           "password": "andres",
+//           "name": "Andres Hino",
+//           "phone_number": "7884262",
+//           "is_active": true,
+//           "is_staff": true,}
+//     );
+//   }catch(e){
+//     print(e.toString());
+//   }
+// }
 
 class MyApp extends StatelessWidget {
   @override
