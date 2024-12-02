@@ -81,6 +81,21 @@ class Mascotas {
     }
   }
 
+
+  Future<String> deleteLostPet(int petId) async {
+    try {
+      final token = await Auth.getToken();
+      await requestHandler.deleteRequest(
+        'post/lost-pets/$petId/',
+        headers: {'Authorization': 'Token $token'},
+      );
+      return 'Mascota eliminada de mascotas perdidas';
+    } catch (e) {
+      print('Error al eliminar mascota perdida: $e');
+      return 'Error al eliminar mascota perdida: ${e.toString()}';
+    }
+  }
+
   Future<String> updatePet({ required int petId, required String petName, required int species, required int breed, required String color, required String description,
     String? photo,
     required String dateLost,
@@ -184,6 +199,7 @@ class Mascotas {
   Future<List<Map<String, dynamic>>> fetchSpecies() async {
     try {
       final token = await Auth.getToken();
+      
       final response = await requestHandler.getRequest(
         'post/species/',
         headers: {'Authorization': 'Token $token'},

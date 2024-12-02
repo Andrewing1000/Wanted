@@ -6,9 +6,8 @@ import 'home_page.dart';
 import 'form_page.dart';
 import '../widgets/manage_screen_widgets/main_app_bar.dart';
 import '../widgets/manage_screen_widgets/bottom_naviagation_bar.dart';
-import 'testing/test_widgets.dart';
 import 'UserMe/VIewProfileScreen.dart';
-import 'UserMe/UserMe.dart'; // Pantalla para editar datos
+import 'UserMe/UserMe.dart';
 
 class ManagerScreen extends StatefulWidget {
   @override
@@ -16,11 +15,11 @@ class ManagerScreen extends StatefulWidget {
 }
 
 class _ManagerScreenState extends State<ManagerScreen> {
-  int _currentIndex = 0; // Índice de la página actual
-  bool _isEditingProfile = false; // Bandera para alternar entre vista y edición
-  final PageController _pageController =
-      PageController(); // Controlador de páginas
+  int _currentIndex = 0;
+  bool _isEditingProfile = false;
+  final PageController _pageController = PageController();
   final AuthService _authService = AuthService();
+  final GlobalKey<HomePageState> _homePageKey = GlobalKey<HomePageState>();
   String? userName;
 
   @override
@@ -29,7 +28,6 @@ class _ManagerScreenState extends State<ManagerScreen> {
     _loadUserName();
   }
 
-  /// Cargar el nombre del usuario
   Future<void> _loadUserName() async {
     final name = await _authService.getUserName();
     setState(() {
@@ -37,16 +35,18 @@ class _ManagerScreenState extends State<ManagerScreen> {
     });
   }
 
-  /// Cambiar a la página seleccionada
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
-      _isEditingProfile =
-          false; // Salir del modo de edición al cambiar de página
+      _isEditingProfile = false;
+      _pageController.jumpToPage(index);
+
+      if (index == 0) {
+        _homePageKey.currentState?.fetchLostPets();
+      }
     });
   }
 
-  /// Alternar entre modo de vista y edición
   void _toggleEditMode() {
     setState(() {
       _isEditingProfile = !_isEditingProfile;
@@ -73,17 +73,25 @@ class _ManagerScreenState extends State<ManagerScreen> {
           );
         },
       ),
-      body: IndexedStack(
-        index: _currentIndex,
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+
+            if (index == 0) {
+              _homePageKey.currentState?.fetchLostPets();
+            }
+          });
+        },
         children: [
-          HomePage(),
+          HomePage(key: _homePageKey),
           PetMePage(),
-          //favoritos();
           PetFormScreen(),
           Center(child: Text('Avistamientos Creados')),
           _isEditingProfile
-              ? ForMeScreen() // Pantalla de edición
-              : ViewProfileScreen(onEdit: _toggleEditMode), // Pantalla de vista
+              ? ForMeScreen()
+              : ViewProfileScreen(onEdit: _toggleEditMode),
         ],
       ),
       bottomNavigationBar: CustomBottomNavigationBar(

@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'package:mascotas_flutter/Services/Pet_Service.dart';
-
 import '../model/RequestHandler.dart';
 import 'auth.dart';
 
