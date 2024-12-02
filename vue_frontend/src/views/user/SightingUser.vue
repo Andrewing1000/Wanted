@@ -10,11 +10,10 @@
       >
         <h3>{{ pet.pet_name }}</h3>
         <img v-if="pet.photo" :src="pet.photo" alt="Foto de mascota" class="pet-photo" />
-        <p class="pet-status" :class="pet.status">Recompensa: {{ pet.reward_amount }} $</p>
 
         <!-- Descripción y Fecha de pérdida -->
         <p class="pet-description">{{ pet.description }}</p>
-        <p class="pet-date-lost"><strong>Fecha de pérdida:</strong> {{ formatDate(pet.date_lost) }}</p>
+        <p class="pet-date-lost"><strong>Fecha de pérdida:</strong> {{ formatDate(pet.date_sighted) }}</p>
 
         <!-- Enlace de Google Maps -->
         <div v-if="activePet && activePet.id === pet.id" class="map-card">
