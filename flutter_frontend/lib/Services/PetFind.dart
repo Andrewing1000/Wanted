@@ -34,18 +34,23 @@ class PetFindService {
       final enrichedSightings = <Map<String, dynamic>>[];
 
       for (final sighting in sightings) {
+        // Manejar el caso en que no se encuentre una mascota coincidente
         final matchingPet = lostPets.firstWhere(
               (pet) =>
           pet['description'] == sighting['description'] &&
               pet['user'] == sighting['user'] &&
               pet['species'] == sighting['species'] &&
               pet['breed'] == sighting['breed'],
-          orElse: () => {'pet_name': 'Sin nombre'},
+          orElse: () => <String, dynamic>{ // Devuelve un mapa vacío como predeterminado
+            'pet_name': 'Sin nombre',
+            'reward_amount': 'No aplica',
+          },
         );
 
         enrichedSightings.add({
           ...sighting,
-          'pet_name': matchingPet['pet_name'] ?? 'Sin nombre',
+          'pet_name': matchingPet['pet_name'], // Usar el valor predeterminado si no hay coincidencia
+          'reward_amount': matchingPet['reward_amount'],
           'status': 'Visto',
         });
       }
@@ -95,14 +100,6 @@ class PetFindService {
     }
   }
 
-  String getRewardForPet(Map<String, dynamic> pet) {
-    if (pet['status'] == 'Perdido') {
-      return pet['reward_amount']?.toString() ?? '0.00';
-    } else {
-      return 'No aplica';
-    }
-  }
-  /// Crear un nuevo avistamiento
   Future<String> createPetSighting({
     required int species,
     required int breed,

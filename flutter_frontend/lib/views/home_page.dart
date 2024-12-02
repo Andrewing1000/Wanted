@@ -64,6 +64,7 @@ class HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Anuncios Recientes'),
         centerTitle: true,
+        automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
@@ -100,7 +101,7 @@ class HomePageState extends State<HomePage> {
                     status: pet['status'],
                     imageUrl: pet['photo'] ?? 'assets/dummy.jpg',
                     dateLost: pet['creation_date'] ?? 'Fecha desconocida',
-                    rewardAmount: petFindService.getRewardForPet(pet),
+                    rewardAmount: pet['reward_amount'] ?? 'No aplica',
                     onTap: () => showPetDetailsModal(context, pet),
                   );
                 },
