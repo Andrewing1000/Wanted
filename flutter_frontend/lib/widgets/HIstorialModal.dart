@@ -11,6 +11,7 @@ import '../widgets/form_widgets/PickerColor.dart';
 import '../widgets/text_input_field.dart';
 import '../widgets/form_widgets/description_input_field.dart';
 import '../widgets/form_widgets/date_picker.dart';
+import '../Services/Delete_pets.dart';
 
 
 class HistorialModal extends StatefulWidget {
@@ -239,6 +240,41 @@ class _HistorialModalState extends State<HistorialModal> {
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
+                    // Botón para eliminar publicación
+                    // Botón de Eliminar
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.withOpacity(0.8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        _deletePost(context); // Llamada a la función para eliminar la publicación
+                      },
+                      child: const Text(
+                        "Eliminar",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+
+// Botón para marcar como Encontrado
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue.withOpacity(0.8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        _markAsFound(context); // Llamada a la función para marcar como encontrado
+                      },
+                      child: const Text(
+                        "Encontrado",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+
                   ],
                 ),
               ],
@@ -248,4 +284,3 @@ class _HistorialModalState extends State<HistorialModal> {
       ),
     );
   }
-}
