@@ -3,30 +3,39 @@
       <h1>Encuentra tu Mascota</h1>
       <div class="pets-container">
         <div class="pet-card" v-for="pet in pets" :key="pet.id">
-          <h3>{{ pet.name }}</h3>
-          <img :src="require(`@/assets/${pet.photo}`)" alt="Mascota" class="pet-photo" />
-          <p class="pet-status" :class="pet.status">{{ pet.status }}</p>
+          <h3>{{ pet.pet_name }}</h3>
+          <!-- imagen perro -->
+          <p class="pet-status" :class="pet.status">{{ pet.reward_amount }}</p>
         </div>
       </div>
     </div>
   </template>
   
   <script>
+  import axios from 'axios';
+  let url = 'http://localhost:8080'
+  const tokenU = localStorage.getItem("UserToken");
+  let config = {
+      headers: {
+          Authorization: 'Token ' + tokenU,
+      }
+  }
   export default {
+  methods: {
+    begin(){
+      axios.get(url+'/post/lost-pets/',config).then((response) => {
+          this.pets = response.data;
+          console.log(this.pets);
+          
+      });
+    },
+  },
+  created () {
+    this.begin()
+  },
     data() {
       return {
-        pets: [
-          { id: 1, name: "Rex", photo: "dog1.png", status: "Encontrado" },
-          { id: 2, name: "Luna", photo: "dog2.png", status: "Buscado" },
-          { id: 3, name: "Max", photo: "dog3.png", status: "Encontrado" },
-          { id: 4, name: "Falcon", photo: "dog4.png", status: "Encontrado" },
-          { id: 5, name: "Jhuli", photo: "dog5.png", status: "Buscado" },
-          { id: 6, name: "Scott", photo: "dog6.png", status: "Encontrado" },
-          { id: 7, name: "Milaneso", photo: "dog7.png", status: "Encontrado" },
-          { id: 8, name: "Mopri", photo: "dog8.png", status: "Encontrado" },
-          { id: 9, name: "Nec", photo: "dog9.png", status: "Buscado" },
-          { id: 10, name: "Princesa", photo: "dog10.png", status: "Encontrado" },
-        ],
+        pets: [],
       };
     },
   };
