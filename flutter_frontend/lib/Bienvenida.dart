@@ -26,6 +26,7 @@ class WelcomeScreenState extends State<WelcomeScreen>{
   }
 
   // Request location permission using permission_handler
+
   void _requestLocationPermission() async {
     var status = await Permission.location.status;
     if (!status.isGranted) {
@@ -76,11 +77,14 @@ class WelcomeScreenState extends State<WelcomeScreen>{
               ),
               SizedBox(height: 20),
               // Toggle Button for Map and Street View
+
+             /*
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   shape: CircleBorder(),
                   padding: EdgeInsets.all(16), // Button color
                 ),
+
                 child: Icon(
                   streetMode ? Icons.map : Icons.streetview,
                   color: Colors.white,
@@ -89,6 +93,8 @@ class WelcomeScreenState extends State<WelcomeScreen>{
               ),
               SizedBox(height: 20),
               // Expanded MapAdapter to take remaining space
+              */
+              /*
               Expanded(
                 child: MapAdapter(
                   controller: _mapController,
@@ -102,16 +108,16 @@ class WelcomeScreenState extends State<WelcomeScreen>{
                   onCameraIdle: _handleCameraIdle,
                   onStreetViewChange: _handleStreetViewChange,
                 ),
-              ),
+              ),*/
             ],
           ),
         ),
       ),
       // Optional Floating Action Button to add a marker
-      floatingActionButton: FloatingActionButton(
+     /* floatingActionButton: FloatingActionButton(
         onPressed: _addMarker,
         child: Icon(Icons.add_location),
-      ),
+      ),*/
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mascotas_flutter/views/Pet_me.dart';
 import '../login.dart';
 import '../Services/auth.dart';
+import 'NearbySearchScreen.dart';
 import 'home_page.dart';
 import 'form_page.dart';
 import '../widgets/manage_screen_widgets/main_app_bar.dart';
@@ -79,7 +80,7 @@ class _ManagerScreenState extends State<ManagerScreen> {
           HomePage(),
           PetMePage(),
           PetFormScreen(),
-          Center(child: Text('Avistamientos Creados')),
+          NearbySearchScreen(),
           _isEditingProfile
               ? ForMeScreen()
               : ViewProfileScreen(onEdit: _toggleEditMode),
