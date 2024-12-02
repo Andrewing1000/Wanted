@@ -16,20 +16,31 @@ from post.serializers import (
     MessageSerializer,
     PetPhotoSerializer, 
 )
+
+from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.exceptions import ValidationError
 
 from PIL import Image
 import math
 
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
+
+@extend_schema(
+    tags=["breeds"],
+)
 class BreedViewSet(viewsets.ModelViewSet): 
-    "Viewset for pet breeds."
+    "Viewset pet breeds."
     queryset = Breed.objects.all()
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [IsAdminOrReadOnly]
     serializer_class = BreedSerializer 
 
-
+@extend_schema(
+    tags=["species"],
+)
 class SpeciesViewSet(viewsets.ModelViewSet):
     "Viewset for pet sepecies."
     queryset = Species.objects.all()
@@ -37,6 +48,9 @@ class SpeciesViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     serializer_class = SpeciesSerializer
 
+@extend_schema(
+    tags=['lost pet posts']
+)
 class LostPetPostViewSet(viewsets.ModelViewSet):
     """ViewSet for lost pet posts."""
     queryset = LostPetPost.objects.all()
@@ -62,6 +76,39 @@ class LostPetPostViewSet(viewsets.ModelViewSet):
             return PetPhotoSerializer
         return super().get_serializer_class()
 
+
+    @extend_schema(
+            operation_id='nearby_search',
+            summary='Find posts made within an area',
+            description='Provide a center an a lookup radius',
+            tags = ['lookup'],
+
+            parameters=[
+                OpenApiParameter(
+                    name = 'center_latitude',
+                    description = 'lookup center latitude',
+                    type = OpenApiTypes.DECIMAL,
+                    examples= [OpenApiExample(name='latitude', value='12.2132')],
+                    required=True,
+                ),
+
+                OpenApiParameter(
+                    name = 'center_longitude',
+                    description= 'lookup center longitude',
+                    type = OpenApiTypes.DECIMAL,
+                    examples= [OpenApiExample(name='longitude', value='34.2343')],
+                    required=True,
+                ),
+                OpenApiParameter(
+                    name='radius',
+                    description='lookup radius',
+                    type = OpenApiTypes.DECIMAL,
+                    examples=[OpenApiExample(name='radius', value='343.3')],
+                    required=True,
+                )
+            ]
+
+    )
     @action(methods=['GET'], detail=False, url_path='near')
     def find_near(self, request, pk=None):
         
@@ -163,8 +210,25 @@ class LostPetPostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance = pet_photos, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @action(methods=['DELETE'], detail=True, url_path='photo/delete')
+    def delete_photo(self, request, pk=None):
+        if not pk:
+            return Response({'photo':'Photo id missing'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        photo_instance = get_object_or_404(PetPhoto, id=pk)
+        if not photo_instance:
+            return Response({'photo':'Photo could not be found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            photo_instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
+@extend_schema(
+    tags=['pet sighting posts']
+)
 class PetSightingPostViewSet(viewsets.ModelViewSet):
     """ViewSet for pet sighting posts."""
     queryset = PetSightingPost.objects.all()
@@ -173,9 +237,33 @@ class PetSightingPostViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
 
+    @extend_schema(
+        operation_id='find_posts',
+        summary='Get a description of the lost-pet-posts',
+        description= 'Retrieve post information, or filter by species',
+        parameters=[
+            OpenApiParameter(
+                name='species',
+                description='species id',
+                type= OpenApiTypes.INT,
+                examples=[
+                    OpenApiExample('Example Species', value='1',)
+                ],
+                required=False,
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         species = self.request.query_params.get('species', None)
         if not species: return PetSightingPost.objects.all()
+
+        try:
+            species = int(species)
+        except Exception as e:
+            raise ValidationError(detail='species must be a number', code=status.HTTP_400_BAD_REQUEST)
         else: return PetSightingPost.objects.filter(species=species)
     
     def perform_create(self, serializer):
@@ -224,9 +312,55 @@ class PetSightingPostViewSet(viewsets.ModelViewSet):
         
         pet_photos = instance.photos.all()
         serializer = self.get_serializer(instance=pet_photos, many=True)
-
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    @action(methods=['DELETE'], detail=True, url_path='photo/delete')
+    def delete_photo(self, request, pk=None):
+        if not pk:
+            return Response({'photo':'Photo id missing'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        photo_instance = get_object_or_404(PetPhoto, id=pk)
+        if not photo_instance:
+            return Response({'photo':'Photo could not be found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            photo_instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @extend_schema(
+        operation_id='nearby_search',
+        summary='Find posts made within an area',
+        description='Provide a center an a lookup radius',
+        tags = ['lookup'],
+
+        parameters=[
+            OpenApiParameter(
+                name = 'center_latitude',
+                description = 'lookup center latitude',
+                type = OpenApiTypes.DECIMAL,
+                examples= [OpenApiExample(name='latitude', value='12.2132')],
+                required=True,
+            ),
+
+            OpenApiParameter(
+                name = 'center_longitude',
+                description= 'lookup center longitude',
+                type = OpenApiTypes.DECIMAL,
+                examples= [OpenApiExample(name='longitude', value='34.2343')],
+                required=True,
+            ),
+            OpenApiParameter(
+                name='radius',
+                description='lookup radius',
+                type = OpenApiTypes.DECIMAL,
+                examples=[OpenApiExample(name='radius', value='343.3')],
+                required=True,
+            )
+        ]
+
+    )
     @action(methods=['GET'], detail=False, url_path='near')
     def find_near(self, request, pk=None):
         
@@ -300,7 +434,11 @@ class PetSightingPostViewSet(viewsets.ModelViewSet):
         return Response(data=return_data, status=status.HTTP_200_OK)
 
 
-
+@extend_schema(
+    summary='User comments API',
+    description='CRUD opeartions for user comments',
+    tags = ['comments']
+)
 class CommentViewSet(viewsets.ModelViewSet):
     """ViewSet for comments."""
     queryset = Comment.objects.all()
@@ -308,11 +446,38 @@ class CommentViewSet(viewsets.ModelViewSet):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
+    @extend_schema(
+            operation_id='get-comments',
+            parameters=[
+                OpenApiParameter(name='parent',
+                                description='parent comment id',
+                                type= OpenApiTypes.INT,
+                                examples=[
+                                    OpenApiExample(
+                                        name='parent_id',
+                                        value='1',
+                                    )
+                                ],
+                                required=False,
+                                ),
+            ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         parent = self.request.query_params.get('parent', None)
-        if parent:
-            return Comment.objects.filter(parent=parent)
-        return Comment.objects.all()
+
+        if not parent:
+            return Comment.objects.all()
+        
+        try:
+            parent = int(parent)
+        except:
+            raise ValidationError(detail='Parent must be a pk', code=status.HTTP_400_BAD_REQUEST)
+        
+        return Comment.objects.filter(parent=parent)
+        
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -327,7 +492,9 @@ class CommentViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("You do not have permission to delete this comment.")
         instance.delete()
 
-
+@extend_schema(
+    tags=['messages']
+)
 class MessageViewSet(viewsets.ModelViewSet):
     """ViewSet for messages."""
     serializer_class = MessageSerializer

@@ -197,3 +197,70 @@ class TestImageUploads(APITestCase):
         expected_data = PetPhotoSerializer(self.pet_sighting_post.photos.all(), many=True).data
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         #self.assertEqual(response.data, expected_data)
+
+    def test_delete_photo_from_lost_post(self):
+        self.client.force_authenticate(self.user)
+
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as image_file:
+            img = Image.new('RGB', (10, 10))
+            img.save(image_file, format='JPEG')
+            image_file.seek(0)
+
+            django_file = File(image_file)
+            instance = PetPhoto.objects.create(post=self.lost_pet_post, photo=django_file)
+
+        url = reverse_lazy('lost-pet-post-delete-photo', kwargs={'pk': instance.id})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_photo_from_lost_post_denied(self):
+        self.client.force_authenticate(self.user)
+
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as image_file:
+            img = Image.new('RGB', (10, 10))
+            img.save(image_file, format='JPEG')
+            image_file.seek(0)
+
+            django_file = File(image_file)
+            instance = PetPhoto.objects.create(post=self.lost_pet_post, photo=django_file)
+
+        url = reverse_lazy('lost-pet-post-delete-photo', kwargs={'pk': instance.id+100})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        
+
+    def test_delete_photo_from_sighting_post(self):
+        self.client.force_authenticate(self.user)
+
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as image_file:
+            img = Image.new('RGB', (10, 10))
+            img.save(image_file, format='JPEG')
+            image_file.seek(0)
+
+            django_file = File(image_file)
+            instance = PetPhoto.objects.create(post=self.pet_sighting_post, photo=django_file)
+
+        url = reverse_lazy('pet-sighting-post-delete-photo', kwargs={'pk': instance.id})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_photo_from_sighting_post_denied(self):
+        self.client.force_authenticate(self.user)
+
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as image_file:
+            img = Image.new('RGB', (10, 10))
+            img.save(image_file, format='JPEG')
+            image_file.seek(0)
+
+            django_file = File(image_file)
+            instance = PetPhoto.objects.create(post=self.pet_sighting_post, photo=django_file)
+
+        url = reverse_lazy('pet-sighting-post-delete-photo', kwargs={'pk': instance.id+100})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    
