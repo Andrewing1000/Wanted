@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import '../widgets/Maps/MapWithRadius.dart';
 import '../services/LookUp.dart';
+import '../widgets/Maps/live_map.dart';
 import '../widgets/start_button.dart';
 
 class NearbySearchScreen extends StatefulWidget {
@@ -184,15 +185,48 @@ class SightingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final latitude = double.tryParse(data['latitude'] ?? '') ?? 0.0;
+    final longitude = double.tryParse(data['longitude'] ?? '') ?? 0.0;
+    final coordinateStream = Stream.value(LatLng(latitude, longitude));
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: ListTile(
-        leading: const Icon(Icons.visibility, color: Colors.blue),
-        title: Text('Avistado en ${data['date_sighted'] ?? 'Fecha desconocida'}'),
-        subtitle: Text(data['description'] ?? 'Sin descripción'),
-        trailing: Text('Color: ${data['color'] ?? 'N/A'}'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Encabezado con el nombre de la mascota y la fecha
+          ListTile(
+            leading: const Icon(Icons.visibility, color: Colors.blue),
+            title: Text(
+              data['description'] != null
+                  ? 'Descripcion: ${data['description']}'
+              
+                  : 'Sin Descripcion',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text('Avistado el ${data['date_sighted'] ?? 'Fecha desconocida'}'),
+          ),
+          const Divider(),
+          // Mapa que muestra la ubicación del avistamiento
+          SizedBox(
+            height: 200,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(8),
+              ),
+              child: LiveMap(
+                coordinateStream: coordinateStream,
+                markerBuilder: (context, position) => const Icon(
+                  Icons.location_on,
+                  color: Colors.red,
+                  size: 40,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

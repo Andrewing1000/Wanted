@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+
 class LiveMap extends StatefulWidget {
   final Stream<LatLng> coordinateStream; // Flujo de coordenadas
   final Widget Function(BuildContext, LatLng)? markerBuilder; // Personalizador del marcador
