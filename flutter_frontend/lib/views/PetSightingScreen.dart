@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import '../services/Pet_Service.dart';
 import '../services/PetFind.dart';
+import '../widgets/form_widgets/PickerColor.dart';
 import '../widgets/form_widgets/date_picker.dart';
 import '../widgets/form_widgets/description_input_field.dart';
 import '../widgets/Maps/location_picker_field.dart';
@@ -119,9 +120,8 @@ class _PetSightingScreenState extends State<PetSightingScreen> {
               controller: _breedController,
             ),
             const SizedBox(height: 16),
-            TextInputField(
-              labelText: 'Color',
-              controller: _colorController,
+            PickerColor(labelText: 'Color',
+                colorController: _colorController
             ),
             const SizedBox(height: 16),
             DescriptionInputField(

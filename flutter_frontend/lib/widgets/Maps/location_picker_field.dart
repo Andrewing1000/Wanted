@@ -35,13 +35,21 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
     }
   }
 
+  /// Método para formatear coordenadas con un máximo de 7 decimales
+  LatLng _formatLatLng(LatLng point) {
+    final formattedLat = double.parse(point.latitude.toStringAsFixed(7));
+    final formattedLon = double.parse(point.longitude.toStringAsFixed(7));
+    return LatLng(formattedLat, formattedLon);
+  }
+
   void _onMapTapped(LatLng point) {
+    final formattedPoint = _formatLatLng(point);
     setState(() {
-      _selectedLocation = point;
+      _selectedLocation = formattedPoint;
       _noResults = false;
     });
-    _updateSearchFieldWithAddress(point);
-    widget.onLocationPicked(point);
+    _updateSearchFieldWithAddress(formattedPoint);
+    widget.onLocationPicked(formattedPoint);
   }
 
   Future<void> _searchLocation(String query) async {
@@ -101,7 +109,7 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
   }
 
   void _onSearchResultSelected(Map<String, dynamic> result) {
-    final LatLng newLocation = LatLng(result["lat"], result["lon"]);
+    final LatLng newLocation = _formatLatLng(LatLng(result["lat"], result["lon"]));
     setState(() {
       _selectedLocation = newLocation;
       _searchController.text = result["name"];
@@ -127,7 +135,7 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
           decoration: InputDecoration(
             labelText: "Buscar ubicación",
             hintText: "Ej: Plaza Murillo, La Paz",
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
             suffixIcon: _isLoading
                 ? const Padding(
               padding: EdgeInsets.all(12.0),
