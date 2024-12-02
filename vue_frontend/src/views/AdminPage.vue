@@ -10,7 +10,8 @@
               <thead>
                 <tr>
                   <th>Nombre</th>
-                  <th>Apellido Completo</th>
+                  <th>Numero</th>
+                  <th>Correo</th>
                   <th>Rol</th>
                   <th>Estado</th>
                   <th>Acciones</th>
@@ -19,15 +20,16 @@
               <tbody>
                 <tr v-for="user in users" :key="user.id">
                   <td>{{ user.name }}</td>
-                  <td>{{ user.surname }}</td>
+                  <td>{{ user.phone_number }}</td>
+                  <td>{{ user.phone_number }}</td>
                   <td>
-                    <span :class="user.role === 'Activo' ? 'status-active' : 'status-inactive'">
+                    <span :class="user.is_staff === 'Activo' ? 'status-inactive' : 'status-active'">
                       {{ user.role }}
                     </span>
                   </td>
                   <td>
-                    <span :class="user.status === 'Activo' ? 'status-active' : 'status-inactive'">
-                      {{ user.status }}
+                    <span :class="user.is_active === 'Activo' ? 'status-active' : 'status-inactive'">
+                      {{ user.is_active }}
                     </span>
                   </td>
                   <td>
@@ -47,21 +49,34 @@
   </template>
   
   <script>
+  import axios from 'axios';
   export default {
+  created () {
+    let url = 'http://localhost:8080'
+    
+    const tokenU = localStorage.getItem("UserToken");
+    let config = {
+        headers: {
+            Authorization: 'Token ' + tokenU,
+        }
+    }
+
+    axios.get(url+'/user/list/',config).then((response) => {
+        this.users = response.data;
+        console.log(this.users);
+        
+    });
+  },
     data() {
       return {
         isMenuActive: false,
-        users: [
-          { id: 1, name: "Hector Hugo", surname: "Campos", role: "Activo", status: "Activo" },
-          { id: 2, name: "Fernando", surname: "Hernandez", role: "Activo", status: "Activo" },
-          { id: 3, name: "Francisco", surname: "González", role: "Inactivo", status: "Activo" },
-        ],
+        users: [],
       };
     },
     methods: {
       toggleMenu() {
         this.isMenuActive = !this.isMenuActive;
-      },
+      }
     },
   };
   </script>
