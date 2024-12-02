@@ -20,7 +20,7 @@ class _PickerColorState extends State<PickerColor> {
 
   /// Convierte un color a su representación hexadecimal
   String _colorToHex(Color color) {
-    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
+    return '${color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
   }
 
   void _openColorPickerDialog() {

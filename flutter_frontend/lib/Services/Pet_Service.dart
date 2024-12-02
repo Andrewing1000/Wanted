@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import '../model/RequestHandler.dart';
 import 'auth.dart';
+import 'dart:typed_data';
 
 class Mascotas {
   final RequestHandler requestHandler = RequestHandler();
@@ -56,11 +59,9 @@ class Mascotas {
 
 
         if (photo != null) {
-          final uploadResponse = await uploadPetPhoto(petId: petId, photoPath: photo);
-
-          // Verificar si la foto se subió exitosamente
+          final uploadResponse = await uploadPetPhoto(petId: petId, photoBytes: base64Decode(photo));
           if (uploadResponse != "Foto subida exitosamente") {
-            throw Exception(uploadResponse);
+            throw Exception('yo'+uploadResponse);
           }
         }
 
@@ -85,20 +86,23 @@ class Mascotas {
 
   Future<String> uploadPetPhoto({
     required int petId,
-    required String photoPath,
-
+    required Uint8List photoBytes,
   }) async {
     final token = await Auth.getToken();
     try {
-      final response = await requestHandler.multipartPostRequest(
+      // Codifica la imagen en base64
+      final String base64Image = base64Encode(photoBytes);
+
+      // Realiza la solicitud POST
+      final response = await requestHandler.postRequest(
         'post/lost-pets/$petId/photos/upload/',
         data: {
-          "post": petId.toString(),
+          "photo": base64Image,
+          "post": petId,
         },
-        filePath: photoPath,
-        fileField: "photo",
         headers: {
           'Authorization': 'Token $token',
+          'Content-Type': 'application/json',
         },
       );
 
