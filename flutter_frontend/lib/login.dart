@@ -142,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           );
                           return;
                         }
-                        var auth = await AuthService();
+                        var auth = AuthService();
                         var response = await auth.Login(correo,contrasenia);
                         if (response == false) {
                           ScaffoldMessenger.of(context).showSnackBar(
