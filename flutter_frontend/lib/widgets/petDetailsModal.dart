@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:async';
 import '../widgets/Maps/live_map.dart';
-import '../Services/Pet_Service.dart'; // Asegúrate de importar correctamente
+import '../services/pet_service.dart';
 
 class PetDetailsModal extends StatefulWidget {
   final Map<String, dynamic> pet;
@@ -66,6 +66,7 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
+      backgroundColor: Colors.grey.withOpacity(1), // Fondo más oscuro
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: isLoading
@@ -77,8 +78,11 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
             // Nombre de la mascota
             Text(
               widget.pet['pet_name'] ?? 'Nombre desconocido',
-              style:
-              const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -88,11 +92,11 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
               children: [
                 Text(
                   'Especie: $speciesName',
-                  style: const TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),
                 Text(
                   'Raza: $breedName',
-                  style: const TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ],
             ),
@@ -103,7 +107,7 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
               children: [
                 Text(
                   'Color:',
-                  style: const TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),
                 const SizedBox(width: 8),
                 Container(
@@ -123,12 +127,12 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
             Text(
               'Descripción:',
               style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
+                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 8),
             Text(
               widget.pet['description'] ?? 'Sin descripción',
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
             const SizedBox(height: 16),
 
@@ -136,7 +140,7 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
             Text(
               'Fecha de pérdida: ${widget.pet['date_lost'] ?? 'Desconocida'}',
               style: const TextStyle(
-                  fontSize: 16, fontStyle: FontStyle.italic),
+                  fontSize: 16, fontStyle: FontStyle.italic, color: Colors.white),
             ),
             const SizedBox(height: 16),
 
@@ -144,7 +148,7 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
             Text(
               'Ubicación:',
               style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
+                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 8),
             SizedBox(
@@ -160,13 +164,37 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
             ),
             const SizedBox(height: 16),
 
-            // Botón para cerrar
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cerrar"),
-              ),
+            // Botones
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.pinkAccent.withOpacity(0.8),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: () {
+                    // Lógica para generar un avistamiento
+                  },
+                  child: const Text(
+                    "Generar Avistamiento",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.greenAccent.withOpacity(0.8),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    "Cerrar",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
