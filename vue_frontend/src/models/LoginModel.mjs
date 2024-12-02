@@ -24,7 +24,7 @@ export const handleLogin = (email, password) => {
         if (response.data.is_staff) {
             window.location.href = "/admin";
         }else{
-            window.location.href = "/prueba";
+            window.location.href = "/pets";
         }
 
         
