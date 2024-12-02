@@ -52,7 +52,7 @@ class _DropdownFieldState extends State<DropdownField> {
       children: [
         Text(
           widget.labelText,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
         ),
         const SizedBox(height: 8),
         _isLoading
@@ -64,7 +64,7 @@ class _DropdownFieldState extends State<DropdownField> {
           items: _items.map((item) {
             return DropdownMenuItem<int>(
               value: item['id'] as int,
-              child: Text(item['value'] as String),
+              child: Text(item['value'] as String, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),),
             );
           }).toList(),
           onChanged: (value) {

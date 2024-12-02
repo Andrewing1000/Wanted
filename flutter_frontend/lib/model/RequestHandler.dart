@@ -1,10 +1,13 @@
+import 'dart:typed_data';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart'; // Import this package
+
 
 class RequestHandler {
   final String baseUrl;
 
-  RequestHandler({this.baseUrl = 'http://localhost:8080/'});
+  RequestHandler({this.baseUrl = 'http://10.0.2.2:8080/'});
 
   // Método para realizar solicitudes GET
   Future<dynamic> getRequest(String endpoint,
@@ -12,7 +15,15 @@ class RequestHandler {
     try {
       final uri =
           Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
-      final response = await http.get(uri, headers: headers);
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          if (headers != null && headers.containsKey('Authorization'))
+            'Authorization':
+                'Token ${headers['Authorization']!.replaceAll('Token ', '')}',
+          ...?headers,
+        });
       return _handleResponse(response);
     } catch (e) {
       _handleError(e);
@@ -71,7 +82,7 @@ class RequestHandler {
 
 // Método para realizar solicitudes DELETE
   Future<dynamic> deleteRequest(String endpoint,
-      {Map<String, String>? params, Map<String, String>? headers}) async {
+      {Map<String, dynamic>? params, Map<String, String>? headers}) async {
     try {
       final uri =
           Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
@@ -115,46 +126,51 @@ class RequestHandler {
     }
   }
 
-  Future<dynamic> multipartPostRequest(String endpoint,
-      {Map<String, String>? data,
-        String? filePath,
-        String? fileField,
-        Map<String, String>? headers}) async {
-    try {
-      final uri = Uri.parse('$baseUrl$endpoint');
-      final request = http.MultipartRequest('POST', uri);
 
-      // Agregar headers
-      if (headers != null) {
-        request.headers.addAll(headers);
-      }
+Future<dynamic> multipartPostRequest(String endpoint,
+    {Map<String, String>? data,
+    Uint8List? binaryImage,
+    String? imageField,
+    Map<String, String>? headers}) async {
+  try {
+    final uri = Uri.parse('$baseUrl$endpoint'); // Replace with your baseUrl + endpoint
+    final request = http.MultipartRequest('POST', uri);
 
-      // Agregar datos
-      if (data != null) {
-        request.fields.addAll(data);
-      }
-
-      // Agregar archivo si se proporciona
-      if (filePath != null && fileField != null) {
-        request.files.add(await http.MultipartFile.fromPath(fileField, filePath));
-      }
-
-      // Enviar solicitud
-      final response = await request.send();
-
-      // Manejar respuesta
-      final responseBody = await response.stream.bytesToString();
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return jsonDecode(responseBody);
-      } else {
-        throw Exception('Error: ${response.statusCode} - ${responseBody.trim()}');
-      }
-    } catch (e) {
-      _handleError(e);
+    // Add headers
+    if (headers != null) {
+      request.headers.addAll(headers);
     }
+
+    // Add form fields
+    if (data != null) {
+      request.fields.addAll(data);
+    }
+
+    // Add binary image
+    if (binaryImage != null && imageField != null) {
+      request.files.add(http.MultipartFile.fromBytes(
+        imageField,
+        binaryImage,
+        filename: "uploaded_image.jpg", // Adjust filename as needed
+        contentType: MediaType('image', 'jpeg'), // Use MediaType from http_parser
+      ));
+    }
+
+    // Send request
+    final response = await request.send();
+
+    // Process response
+    final responseBody = await response.stream.bytesToString();
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonDecode(responseBody);
+    } else {
+      throw Exception('Error: ${response.statusCode} - ${responseBody.trim()}');
+    }
+  } catch (e) {
+    print('Error: $e');
+    throw Exception('Failed to upload file: $e');
   }
-
-
+}
 
 
 

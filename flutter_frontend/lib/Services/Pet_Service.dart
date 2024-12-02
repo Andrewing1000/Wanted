@@ -22,21 +22,19 @@ class Mascotas {
     }
   }
 
-  Future<String> registerPet({
+  Future<Map<String, dynamic>> registerPet({
     required String petName,
     required int species,
     required int breed,
     required String color,
     required String description,
-    required String? photo,
     required String dateLost,
-    required String lat,
-    required String long,
-    required String rewardAmount,
+    required double lat,
+    required double long,
+    required double rewardAmount,
   }) async {
     try {
       final token = await Auth.getToken();
-      // Paso 1: Registrar la mascota sin foto
       final response = await requestHandler.postRequest(
         'post/lost-pets/',
         data: {
@@ -53,19 +51,11 @@ class Mascotas {
         headers: {'Authorization': 'Token $token'},
       );
 
+
+
       // Verificar respuesta
       if (response != null && response['id'] != null) {
-        final int petId = response['id'];
-
-
-        if (photo != null) {
-          final uploadResponse = await uploadPetPhoto(petId: petId, photoBytes: base64Decode(photo));
-          if (uploadResponse != "Foto subida exitosamente") {
-            throw Exception('yo'+uploadResponse);
-          }
-        }
-
-        return 'Mascota registrada exitosamente con foto';
+        return response;
       } else {
         throw Exception('Error al registrar la mascota. Formato no válido.');
       }
@@ -73,12 +63,12 @@ class Mascotas {
       if (e.toString().contains('400')) {
         try {
           final errorData = e.toString().split('- ')[1];
-          return 'Error: ${errorData.trim()}';
+          return {'error': 'Error: ${errorData.trim()}'};
         } catch (_) {
-          return 'Ocurrió un error inesperado. ${e.toString()}';
+          return {'error': ''};
         }
       }
-      return 'Ocurrió un error inesperado. ${e.toString()}';
+      return{'error': 'Ocurrió un error inesperado. ${e.toString()}'};
     }
   }
 
@@ -94,11 +84,12 @@ class Mascotas {
       final String base64Image = base64Encode(photoBytes);
 
       // Realiza la solicitud POST
-      final response = await requestHandler.postRequest(
+      final response = await requestHandler.multipartPostRequest(
         'post/lost-pets/$petId/photos/upload/',
+        imageField: 'photo',
+        binaryImage: photoBytes,  
         data: {
-          "photo": base64Image,
-          "post": petId,
+          "post": "$petId",
         },
         headers: {
           'Authorization': 'Token $token',
