@@ -111,7 +111,7 @@ class _LiveMapWithRadiusState extends State<LiveMapWithRadius> {
                   Slider(
                     value: _currentRadius,
                     min: 10, // Mínimo 10 metros
-                    max: 150,
+                    max: 350,
                     divisions: 100,
                     label: "${_currentRadius.toInt()} m",
                     onChanged: _updateRadius,

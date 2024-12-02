@@ -63,7 +63,7 @@ class _NearbySearchScreenState extends State<NearbySearchScreen> {
                 const Text('Mascotas perdidas cercanas:', style: TextStyle(fontWeight: FontWeight.bold)),
                 if (lostPets.isEmpty)
                   const Text('No se encontraron mascotas perdidas.'),
-                ...lostPets.map((pet) => Text('• ${pet['name'] ?? 'Sin nombre'}')).toList(),
+                ...lostPets.map((pet) => Text('• ${pet['pet_name'] ?? 'Sin nombre'}')).toList(),
                 const SizedBox(height: 16),
                 const Text('Avistamientos cercanos:', style: TextStyle(fontWeight: FontWeight.bold)),
                 if (sightings.isEmpty)

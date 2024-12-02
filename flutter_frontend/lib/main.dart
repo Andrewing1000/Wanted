@@ -13,10 +13,10 @@ void main() async {
   await checkServerConnection();
   AuthService res = AuthService();
   final reponse = RequestHandler();
+  /*
   res.Login('admin@example.com', 'admin');
   final email = await res.getUserEmail();
   final token = await res.getToken();
-/*
   var raza=await reponse.postRequest('post/species/',
       data:{
         "value": "DATA DUMMY",
@@ -24,8 +24,7 @@ void main() async {
       headers: {
         'Authorization': 'Token $token',
       });
-/*
-*/
+
   var popo=await reponse.postRequest('post/breeds/',
       data:{
         "value": "DATA DUMMY 2",
@@ -34,7 +33,6 @@ void main() async {
         'Authorization': 'Token $token',
       });
 */
-
   //await Registro();
   runApp(MyApp());
 }
