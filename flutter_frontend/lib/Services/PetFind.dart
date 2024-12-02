@@ -67,16 +67,21 @@ class PetFindService {
       final lostPets = await petService.fetchLostPets();
       final sightings = await fetchPetSightings();
 
+      // Crear conjuntos para facilitar la verificación
       final matchedDescriptions = sightings.map((sighting) => sighting['description']).toSet();
       final matchedUsers = sightings.map((sighting) => sighting['user']).toSet();
 
       return lostPets.map((pet) {
-        final isSeen = matchedDescriptions.contains(pet['description']) &&
-            matchedUsers.contains(pet['user']);
+        // Verificar si la mascota tiene un avistamiento coincidente
+        final hasAppearance = sightings.any((sighting) =>
+        sighting['description'] == pet['description'] &&
+            sighting['user'] == pet['user'] &&
+            sighting['species'] == pet['species'] &&
+            sighting['breed'] == pet['breed']);
 
         return {
           ...pet,
-          'status': isSeen ? 'Visto' : 'Perdido',
+          'status': hasAppearance ? 'Visto' : 'Perdido', // Actualizar estado
         };
       }).toList();
     } catch (e) {
@@ -84,6 +89,7 @@ class PetFindService {
       return [];
     }
   }
+
 
   Future<List<Map<String, dynamic>>> fetchSightingsForLostPet(Map<String, dynamic> pet) async {
     try {

@@ -30,6 +30,9 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
   void initState() {
     super.initState();
     _selectedLocation = widget.initialLocation ?? LatLng(-16.5038, -68.1193); // La Paz
+    if (_selectedLocation != null) {
+      _updateSearchFieldWithAddress(_selectedLocation!);
+    }
   }
 
   void _onMapTapped(LatLng point) {
@@ -37,6 +40,7 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
       _selectedLocation = point;
       _noResults = false;
     });
+    _updateSearchFieldWithAddress(point);
     widget.onLocationPicked(point);
   }
 
@@ -63,7 +67,7 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
           })
               .toList();
           _isLoading = false;
-          _noResults = _searchResults.isEmpty; // Indicar si no hay resultados
+          _noResults = _searchResults.isEmpty;
         });
       } else {
         setState(() {
@@ -76,6 +80,23 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
         _isLoading = false;
         _noResults = true;
       });
+    }
+  }
+
+  Future<void> _updateSearchFieldWithAddress(LatLng location) async {
+    final url =
+        "https://nominatim.openstreetmap.org/reverse?lat=${location.latitude}&lon=${location.longitude}&format=json";
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final displayName = data['display_name'] ?? 'Dirección desconocida';
+        setState(() {
+          _searchController.text = displayName;
+        });
+      }
+    } catch (e) {
+      print('Error al obtener la dirección: $e');
     }
   }
 
@@ -96,11 +117,11 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           "Ubicación",
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         TextField(
           controller: _searchController,
           decoration: InputDecoration(
@@ -108,8 +129,8 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
             hintText: "Ej: Plaza Murillo, La Paz",
             border: OutlineInputBorder(),
             suffixIcon: _isLoading
-                ? Padding(
-              padding: const EdgeInsets.all(12.0),
+                ? const Padding(
+              padding: EdgeInsets.all(12.0),
               child: SizedBox(
                 width: 15,
                 height: 15,
@@ -119,14 +140,14 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
               ),
             )
                 : IconButton(
-              icon: Icon(Icons.search),
+              icon: const Icon(Icons.search),
               onPressed: () => _searchLocation(_searchController.text),
             ),
           ),
         ),
         if (_noResults)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
+          const Padding(
+            padding: EdgeInsets.only(top: 8.0),
             child: Text(
               "Lugar no encontrado.",
               style: TextStyle(color: Colors.red, fontSize: 14),
@@ -134,7 +155,7 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
           ),
         if (_searchResults.isNotEmpty)
           Card(
-            margin: EdgeInsets.only(top: 8),
+            margin: const EdgeInsets.only(top: 8),
             elevation: 4,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -145,14 +166,14 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
               itemBuilder: (context, index) {
                 final result = _searchResults[index];
                 return ListTile(
-                  leading: Icon(Icons.place, color: Colors.blue),
-                  title: Text(result["name"], style: TextStyle(fontSize: 14)),
+                  leading: const Icon(Icons.place, color: Colors.blue),
+                  title: Text(result["name"], style: const TextStyle(fontSize: 14)),
                   onTap: () => _onSearchResultSelected(result),
                 );
               },
             ),
           ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Container(
           height: 200,
           decoration: BoxDecoration(
@@ -178,7 +199,7 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
                       point: _selectedLocation!,
                       width: 40,
                       height: 40,
-                      builder: (ctx) => Icon(
+                      builder: (ctx) => const Icon(
                         Icons.location_pin,
                         color: Colors.red,
                         size: 40,

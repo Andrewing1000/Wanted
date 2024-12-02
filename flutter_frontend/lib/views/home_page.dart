@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/PetFind.dart';
 import '../widgets/petDetailsModal.dart';
 import '../widgets/pet_card.dart';
-import '../services/Pet_Service.dart';
+import '../widgets/pet_grid.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -12,7 +12,6 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  final Mascotas petService = Mascotas();
   final PetFindService petFindService = PetFindService();
 
   List<Map<String, dynamic>> petData = [];
@@ -36,9 +35,9 @@ class HomePageState extends State<HomePage> {
       final sightings = await petFindService.fetchEnrichedSightings();
 
       setState(() {
-        petData = lostPets.where((pet) => pet['status'] == 'Perdido').toList();
-        sightingsData = sightings.where((sighting) => sighting['status'] == 'Visto').toList();
-        filteredPetData = List.from(petData + sightingsData);
+        petData = lostPets;
+        sightingsData = sightings;
+        filteredPetData = List.from(lostPets + sightings);
         isLoading = false;
       });
     } catch (e) {
@@ -73,38 +72,9 @@ class HomePageState extends State<HomePage> {
                 ? const Center(child: CircularProgressIndicator())
                 : RefreshIndicator(
               onRefresh: fetchInitialData,
-              child: filteredPetData.isEmpty
-                  ? ListView(
-                children: const [
-                  Center(
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 100),
-                      child: Text(
-                        "No hay información disponible.",
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-                  : GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                ),
-                itemCount: filteredPetData.length,
-                itemBuilder: (context, index) {
-                  final pet = filteredPetData[index];
-                  return PetCard(
-                    username: pet['user']?.toString() ?? 'Usuario desconocido',
-                    petName: pet['pet_name'] ?? 'Sin nombre',
-                    status: pet['status'],
-                    imageUrl: pet['photo'] ?? 'assets/dummy.jpg',
-                    dateLost: pet['creation_date'] ?? 'Fecha desconocida',
-                    rewardAmount: pet['reward_amount'] ?? 'No aplica',
-                    onTap: () => showPetDetailsModal(context, pet),
-                  );
-                },
+              child: PetGrid(
+                petData: filteredPetData,
+                onPetSelected: (pet) => showPetDetailsModal(context, pet),
               ),
             ),
           ),
