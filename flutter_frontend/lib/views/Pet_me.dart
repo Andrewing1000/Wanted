@@ -1,75 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:mascotas_flutter/Services/petme_service.dart';
-import '../widgets/HomeWidget/tab_bar_widget.dart';
-import '../widgets/petDetailsModal.dart';
-import '../widgets/pet_card.dart';
-import '../services/Pet_Service.dart';
+import 'package:mascotas_flutter/widgets/petDetailsModal.dart';
+import 'package:mascotas_flutter/widgets/pet_card.dart';
+import '../services/petme_service.dart';
 
-class HomePage extends StatefulWidget {
+class PetMePage extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _PetMePageState createState() => _PetMePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
-
-
-  late TabController _tabController;
-  final Mascotas _petService = Mascotas();
+class _PetMePageState extends State<PetMePage> with SingleTickerProviderStateMixin {
+  final Historial _historialService = Historial();
 
   List<Map<String, dynamic>> petData = [];
   List<Map<String, dynamic>> filteredPetData = [];
-  bool _isLoading = true; // Estado de carga
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(_filterPets);
+    _fetchUserPets();
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _fetchPets(); // Cargar datos cada vez que se muestra la página
-  }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
-  Future<void> _fetchPets() async {
+  Future<void> _fetchUserPets() async {
     setState(() {
       _isLoading = true;
     });
 
-    final data = await _petService.fetchLostPets();
-    setState(() {
-      petData = data;
-      filteredPetData = List.from(data);
-      _isLoading = false; // Termina la carga
-    });
+    try {
+      final data = await _historialService.filtrarMascotasPorUsuario();
+      setState(() {
+        petData = data;
+        filteredPetData = List.from(data);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al cargar mascotas: $e')),
+      );
+    }
   }
 
-  void _filterPets() {
-    setState(() {
-      switch (_tabController.index) {
-        case 0:
-          filteredPetData = List.from(petData);
-          break;
-        case 1:
-          filteredPetData =
-              petData.where((pet) => pet['status'] == 'Perdido').toList();
-          break;
-        case 2:
-          filteredPetData =
-              petData.where((pet) => pet['status'] == 'Visto').toList();
-          break;
-      }
-    });
-  }
-
+//MODAL
   void showPetDetailsModal(BuildContext context, Map<String, dynamic> pet) {
     showDialog(
       context: context,
@@ -86,28 +63,27 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TabBarWidget(tabController: _tabController), // TabBar personalizado
+
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              "Anuncios Recientes",
+              "Mis Mascotas",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(
             child: _isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : RefreshIndicator(
-              onRefresh: _fetchPets, // Refrescar los datos
+              onRefresh: _fetchUserPets,
               child: petData.isEmpty
                   ? ListView(
-                // Necesario para usar RefreshIndicator con contenido vacío
-                children: [
+                children: const [
                   Center(
                     child: Padding(
                       padding: EdgeInsets.only(top: 100),
                       child: Text(
-                        "No hay información disponible.",
+                        "No tienes mascotas registradas.",
                         style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                     ),

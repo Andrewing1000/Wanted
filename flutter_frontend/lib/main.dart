@@ -3,24 +3,20 @@
 import 'package:flutter/material.dart';
 //import 'views/manager_screen.dart';
 import 'Bienvenida.dart';
+import 'Services/Pet_Service.dart';
 import 'model/RequestHandler.dart';
 import 'Services/auth.dart';
 
 void main() async {
+
+
+
   final reponse = RequestHandler();
   //await perro();
   WidgetsFlutterBinding.ensureInitialized();
   await checkServerConnection();
   AuthService res = AuthService();
-  res.Login('admin@example.com', 'admin');
-  final email = await res.getUserEmail();
- final token = await res.getToken();
- 
- var raza=await reponse.getRequest('post/species/', headers: {
-   'Authorization': 'Token $token',
-   });
 
- print(raza);
 
   //await Registro();
   runApp(MyApp());
