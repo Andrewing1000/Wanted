@@ -9,6 +9,20 @@ import RegisterPage from '../views/RegisterPage.vue';
 import LoginPage from '../views/LoginPage.vue';
 import AdminPage from '../views/AdminPage.vue';
 import PruebaPage from '../views/PruebaPage.vue';
+
+// Páginas del usuario
+import PetUser from '../views/user/PetUser.vue';
+import ServicesUser from '../views/user/ServicesUser.vue';
+import BlogUser from '../views/user/BlogUser.vue';
+import ProfileUser from '../views/user/ProfileUser.vue';
+
+// Páginas del Menu Drawer
+import ConfigUser from '../views/user/ConfigUser.vue';
+import PublishUser from '../views/user/PublishUser.vue';
+import SightingUser from '../views/user/SightingUser.vue';
+import SavedPostUser from '../views/user/SavedPostUser.vue';
+
+
 const routes = [
   { path: '/', name: 'Inicio', component: HomePage },
   { path: '/servicios', name: 'Servicios', component: ServicesPage },
@@ -19,6 +33,17 @@ const routes = [
   { path: '/iniciar-sesion', component: LoginPage },
   { path: '/admin', component: AdminPage },
   { path: '/prueba', component: PruebaPage },
+  // Rutas del usuario
+  { path: '/pets', name: 'Pets User', component: PetUser },
+  { path: '/services-user', name: 'Services User', component: ServicesUser },
+  { path: '/blog-user', name: 'Blog User', component: BlogUser },
+  { path: '/profile-user', name: 'Profile User', component: ProfileUser },
+
+  // Rutas del Menu Drawer
+  { path: '/config-user', name: 'Settings User', component: ConfigUser },
+  { path: '/publish-user', name: 'Post User', component: PublishUser },
+  { path: '/sighting-user', name: 'Sighting User', component: SightingUser },
+  { path: '/saved-post-user', name: 'Saved Posts User', component: SavedPostUser },
 ];
 
 const router = createRouter({
