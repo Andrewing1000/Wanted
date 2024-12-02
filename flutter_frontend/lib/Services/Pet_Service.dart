@@ -82,7 +82,50 @@ class Mascotas {
     }
   }
 
+  Future<String> updatePet({ required int petId, required String petName, required int species, required int breed, required String color, required String description,
+    String? photo,
+    required String dateLost,
+    required String lat,
+    required String long,
+    String? rewardAmount,
+  }) async {
+    try {
+      final authToken = await AuthService().getToken(); // Obtén el token del usuario autenticado.
 
+      // Datos que se enviarán al servidor.
+      final Map<String, dynamic> data = {
+        "pet_name": petName,
+        "species": species,
+        "breed": breed,
+        "color": color,
+        "description": description,
+        "date_lost": dateLost,
+        "latitude": lat,
+        "longitude": long,
+        "reward_amount": rewardAmount ?? '',
+      };
+
+      // Incluye la imagen si está disponible.
+      if (photo != null) {
+        data["photo"] = photo;
+      }
+
+      // Realizar la solicitud PUT.
+      final response = await requestHandler.putRequest(
+        'post/lost-pets/$petId/',
+        data: data,
+        headers: {
+          'Authorization': 'Token $authToken',
+        },
+      );
+
+      // Devuelve la respuesta en caso de éxito.
+      return "Mascota actualizada con éxito";
+    } catch (e) {
+      print("Error al actualizar la mascota: $e");
+      throw Exception("Error al actualizar la mascota");
+    }
+  }
 
   Future<String> uploadPetPhoto({
     required int petId,

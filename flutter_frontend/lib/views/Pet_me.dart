@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mascotas_flutter/widgets/HIstorialModal.dart';
 import 'package:mascotas_flutter/widgets/petDetailsModal.dart';
 import 'package:mascotas_flutter/widgets/pet_card.dart';
 import '../services/petme_service.dart';
@@ -51,9 +52,10 @@ class _PetMePageState extends State<PetMePage> with SingleTickerProviderStateMix
     showDialog(
       context: context,
       builder: (context) {
-        return PetDetailsModal(pet: pet);
+        return HistorialModal(pet: pet);
       },
     );
+
   }
 
 
