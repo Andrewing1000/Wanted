@@ -1,7 +1,7 @@
 
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Services/RequestHandler.dart';
+import '../model/RequestHandler.dart';
 
 class AuthService{
   Future<bool> Login(String correo, String contrasenia) async {
@@ -15,6 +15,7 @@ class AuthService{
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', login['token']);
         await prefs.setString('userName', login['name']);
+        await prefs.setString('email', login['email']);
         return true;
       } else {
         return false;
@@ -28,6 +29,7 @@ Future<String> registerCreate(String correo,String contrasenia,String nombre, St
   final resquesthandler = RequestHandler();
   try{
     final register = await resquesthandler.postRequest('user/create/',
+
         data:{
           "email": correo,
           "password": contrasenia,
@@ -65,12 +67,58 @@ Future<String> registerCreate(String correo,String contrasenia,String nombre, St
           'user/logout/',
           headers: {'Authorization': 'Token $token'},
         );
-        await prefs.clear(); 
       }
+
+      await prefs.clear(); // Limpiar los datos
     } catch (e) {
       print('Error al cerrar sesión: $e');
     }
   }
+
+  /// Obtener el nombre del usuario almacenado
+  Future<String?> getUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userName');
+  }
+
+
+  Future<String?> getUserEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('email');
+  }
+
+  /// Obtener el token almacenado
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
+
+
+  //// NO TOCAR
+  Future<String> Connection() async {
+    var con = RequestHandler();
+
+    try {
+      final response = con.getRequest('health_check');
+      print('Respuesta obtenida: $response');
+
+      final errorJson = jsonDecode(response as String)['status'];
+      print('Estado decodificado: $errorJson');
+
+      if (errorJson == 'Error al conectar con el servidor') {
+        print('Error: No se pudo conectar al servidor.');
+        return 'Error al conectar con el servidor';
+      }
+
+      print('Conexión exitosa.');
+      return 'Conexión exitosa';
+    } catch (e) {
+      print('Excepción capturada: $e');
+      return 'Error al procesar la solicitud';
+    }
+  }
+
 
 
 
