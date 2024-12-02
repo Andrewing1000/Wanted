@@ -3,6 +3,7 @@ import 'package:latlong2/latlong.dart';
 import 'dart:async';
 import '../widgets/Maps/live_map.dart';
 import '../services/pet_service.dart';
+import '../services/PetFind.dart'; // Importar el servicio para el historial
 import '../views/PetSightingScreen.dart'; // Importar la pantalla de avistamientos
 
 class PetDetailsModal extends StatefulWidget {
@@ -18,11 +19,13 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
   String? breedName;
   String? speciesName;
   bool isLoading = true;
+  List<Map<String, dynamic>> sightingsHistory = [];
 
   @override
   void initState() {
     super.initState();
     _loadPetDetails();
+    _loadSightingsHistory();
   }
 
   Future<void> _loadPetDetails() async {
@@ -52,13 +55,29 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
     }
   }
 
+  Future<void> _loadSightingsHistory() async {
+    try {
+      final petFindService = PetFindService();
+      final history = await petFindService.fetchSightingsForLostPet(
+        petId: widget.pet['id'],
+        description: widget.pet['description'],
+        user: widget.pet['user'],
+      );
+
+      setState(() {
+        sightingsHistory = history;
+      });
+    } catch (e) {
+      print("Error al cargar el historial de avistamientos: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Coordenadas de la mascota
     final latitude = double.tryParse(widget.pet['latitude'] ?? '') ?? 0.0;
     final longitude = double.tryParse(widget.pet['longitude'] ?? '') ?? 0.0;
-    final Stream<LatLng> coordinateStream =
-    Stream.value(LatLng(latitude, longitude));
+    final Stream<LatLng> coordinateStream = Stream.value(LatLng(latitude, longitude));
 
     // Extraer color
     final String colorHex = widget.pet['color'] ?? '#FFFFFF';
@@ -93,13 +112,11 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
               children: [
                 Text(
                   'Especie: $speciesName',
-                  style:
-                  const TextStyle(fontSize: 16, color: Colors.white),
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),
                 Text(
                   'Raza: $breedName',
-                  style:
-                  const TextStyle(fontSize: 16, color: Colors.white),
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ],
             ),
@@ -130,15 +147,12 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
             const Text(
               'Descripción:',
               style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
+                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 8),
             Text(
               widget.pet['description'] ?? 'Sin descripción',
-              style:
-              const TextStyle(fontSize: 16, color: Colors.white),
+              style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
             const SizedBox(height: 16),
 
@@ -146,9 +160,7 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
             Text(
               'Fecha de pérdida: ${widget.pet['date_lost'] ?? 'Desconocida'}',
               style: const TextStyle(
-                  fontSize: 16,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.white),
+                  fontSize: 16, fontStyle: FontStyle.italic, color: Colors.white),
             ),
             const SizedBox(height: 16),
 
@@ -156,9 +168,7 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
             const Text(
               'Ubicación:',
               style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
+                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 8),
             SizedBox(
@@ -201,6 +211,20 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent.withOpacity(0.8),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: () {
+                    _showSightingsHistory(context);
+                  },
+                  child: const Text(
+                    "Ver Apariciones",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.greenAccent.withOpacity(0.8),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
@@ -216,6 +240,30 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showSightingsHistory(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: sightingsHistory.length,
+            itemBuilder: (context, index) {
+              final sighting = sightingsHistory[index];
+              return ListTile(
+                leading: Icon(Icons.location_on, color: Colors.blue),
+                title: Text('Fecha: ${sighting['date_sighted']}'),
+                subtitle: Text('Ubicación: ${sighting['latitude']}, ${sighting['longitude']}'),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 

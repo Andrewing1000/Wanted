@@ -29,7 +29,7 @@ class _PetSightingScreenState extends State<PetSightingScreen> {
   void initState() {
     super.initState();
 
-    // Inicializar los controladores con los valores del pet
+    // Inicializar los controladores con los valores de la mascota
     _speciesController.text = widget.pet['species']?.toString() ?? 'Desconocida';
     _breedController.text = widget.pet['breed']?.toString() ?? 'Desconocida';
     _colorController.text = widget.pet['color'] ?? 'Desconocido';
@@ -57,47 +57,39 @@ class _PetSightingScreenState extends State<PetSightingScreen> {
   }
 
   /// Guardar el avistamiento
-  void _saveSighting() async {
+  Future<void> _saveSighting() async {
     if (_selectedDate == null || _selectedLocation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor selecciona una fecha y ubicación')),
+        const SnackBar(content: Text('Por favor selecciona una fecha y ubicación')),
       );
       return;
     }
 
     final petFindService = PetFindService();
-    final petService = Mascotas();
-
-    final sightingData = {
-      "species": widget.pet['species'],
-      "breed": widget.pet['breed'],
-      "color": widget.pet['color'],
-      "description": widget.pet['description'],
-      "date_sighted": _selectedDate!.toIso8601String().split("T").first,
-      "latitude": _selectedLocation!.latitude.toString(),
-      "longitude": _selectedLocation!.longitude.toString(),
-    };
 
     try {
-      // Crear avistamiento
+      // Crear el avistamiento en el backend
       final result = await petFindService.createPetSighting(
-        species: sightingData["species"],
-        breed: sightingData["breed"],
-        color: sightingData["color"],
-        description: sightingData["description"],
-        dateSighted: sightingData["date_sighted"],
-        latitude: sightingData["latitude"],
-        longitude: sightingData["longitude"],
+        species: widget.pet['species'],
+        breed: widget.pet['breed'],
+        color: widget.pet['color'],
+        description: widget.pet['description'],
+        dateSighted: _selectedDate!.toIso8601String().split("T").first,
+        latitude: _selectedLocation!.latitude.toString(),
+        longitude: _selectedLocation!.longitude.toString(),
       );
-
-      // Eliminar mascota perdida
-      await petService.deleteLostPet(widget.pet['id']);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result)),
       );
 
-      Navigator.pop(context, result);
+      // Retornar a la página anterior con una actualización del estado
+      Navigator.pop(context, {
+        'status': 'Visto',
+        'dateSighted': _selectedDate,
+        'latitude': _selectedLocation!.latitude,
+        'longitude': _selectedLocation!.longitude,
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al guardar el avistamiento: $e')),
@@ -105,12 +97,11 @@ class _PetSightingScreenState extends State<PetSightingScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Generar Avistamiento'),
+        title: const Text('Generar Avistamiento'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

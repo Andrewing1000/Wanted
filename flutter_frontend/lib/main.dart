@@ -8,15 +8,32 @@ import 'model/RequestHandler.dart';
 import 'Services/auth.dart';
 
 void main() async {
-
-
-
-  final reponse = RequestHandler();
   //await perro();
   WidgetsFlutterBinding.ensureInitialized();
   await checkServerConnection();
   AuthService res = AuthService();
-
+  final reponse = RequestHandler();
+  res.Login('admin@example.com', 'admin');
+  final email = await res.getUserEmail();
+  final token = await res.getToken();
+/*
+  var raza=await reponse.postRequest('post/species/',
+      data:{
+        "value": "DATA DUMMY",
+      },
+      headers: {
+        'Authorization': 'Token $token',
+      });
+/*
+*/
+  var popo=await reponse.postRequest('post/breeds/',
+      data:{
+        "value": "DATA DUMMY 2",
+      },
+      headers: {
+        'Authorization': 'Token $token',
+      });
+*/
 
   //await Registro();
   runApp(MyApp());

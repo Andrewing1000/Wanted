@@ -31,19 +31,26 @@ class PetFindService {
   /// Obtener mascotas vistas enriquecidas con nombres
   Future<List<Map<String, dynamic>>> fetchEnrichedSightings() async {
     try {
-      // Obtener los avistamientos
       final sightings = await fetchPetSightings();
+      final lostPets = await petService.fetchLostPets();
       final enrichedSightings = <Map<String, dynamic>>[];
 
       for (final sighting in sightings) {
-        // Buscar información de la mascota asociada
-        final pet = await petService.fetchPetById(sighting['id']);
+        // Buscar coincidencia entre descripción y usuario
+        final matchingPet = lostPets.firstWhere(
+              (pet) =>
+          pet['description'] == sighting['description'] &&
+              pet['user'] == sighting['user'] &&
+              pet['species'] == sighting['species'] &&
+              pet['breed'] == sighting['breed'], // Agregar más filtros si es necesario
+          orElse: () => {'pet_name': 'Sin nombre'}, // Valor predeterminado
+        );
 
-        // Validar si se encontró la mascota
+        // Agregar información adicional
         enrichedSightings.add({
           ...sighting,
-          'pet_name': pet != null ? pet['pet_name'] : 'Sin nombre',
-          'status': 'Visto', // Asignar estado "Visto" a los avistamientos
+          'pet_name': matchingPet['pet_name'] ?? 'Sin nombre',
+          'status': 'Visto',
         });
       }
 
@@ -58,14 +65,39 @@ class PetFindService {
   Future<List<Map<String, dynamic>>> fetchLostPetsWithStatus() async {
     try {
       final lostPets = await petService.fetchLostPets();
+      final sightings = await fetchPetSightings();
+
+      // Excluir mascotas con avistamientos coincidentes
+      final matchedDescriptions = sightings.map((sighting) => sighting['description']).toSet();
+      final matchedUsers = sightings.map((sighting) => sighting['user']).toSet();
+
       return lostPets.map((pet) {
+        final isSeen = matchedDescriptions.contains(pet['description']) &&
+            matchedUsers.contains(pet['user']);
+
         return {
           ...pet,
-          'status': 'Perdido', // Asignar estado "Perdido" a las mascotas perdidas
+          'status': isSeen ? 'Visto' : 'Perdido',
         };
       }).toList();
     } catch (e) {
       print('Error al obtener mascotas perdidas enriquecidas: $e');
+      return [];
+    }
+  }
+
+  /// Obtener historial de avistamientos para una mascota perdida
+  Future<List<Map<String, dynamic>>> fetchSightingsForLostPet(Map<String, dynamic> pet) async {
+    try {
+      final sightings = await fetchPetSightings();
+      return sightings.where((sighting) {
+        return sighting['description'] == pet['description'] &&
+            sighting['user'] == pet['user'] &&
+            sighting['species'] == pet['species'] &&
+            sighting['breed'] == pet['breed']; // Filtros adicionales
+      }).toList();
+    } catch (e) {
+      print('Error al obtener historial de avistamientos: $e');
       return [];
     }
   }
