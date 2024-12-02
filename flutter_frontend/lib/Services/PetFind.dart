@@ -8,7 +8,6 @@ class PetFindService {
   final AuthService authService = AuthService();
   final Mascotas petService = Mascotas();
 
-  /// Obtener todos los avistamientos
   Future<List<Map<String, dynamic>>> fetchPetSightings() async {
     try {
       final token = await authService.getToken();
@@ -28,7 +27,6 @@ class PetFindService {
     }
   }
 
-  /// Obtener mascotas vistas enriquecidas con nombres
   Future<List<Map<String, dynamic>>> fetchEnrichedSightings() async {
     try {
       final sightings = await fetchPetSightings();
@@ -36,17 +34,15 @@ class PetFindService {
       final enrichedSightings = <Map<String, dynamic>>[];
 
       for (final sighting in sightings) {
-        // Buscar coincidencia entre descripción y usuario
         final matchingPet = lostPets.firstWhere(
               (pet) =>
           pet['description'] == sighting['description'] &&
               pet['user'] == sighting['user'] &&
               pet['species'] == sighting['species'] &&
-              pet['breed'] == sighting['breed'], // Agregar más filtros si es necesario
-          orElse: () => {'pet_name': 'Sin nombre'}, // Valor predeterminado
+              pet['breed'] == sighting['breed'],
+          orElse: () => {'pet_name': 'Sin nombre'},
         );
 
-        // Agregar información adicional
         enrichedSightings.add({
           ...sighting,
           'pet_name': matchingPet['pet_name'] ?? 'Sin nombre',
@@ -61,13 +57,11 @@ class PetFindService {
     }
   }
 
-  /// Obtener todas las mascotas perdidas enriquecidas con estado
   Future<List<Map<String, dynamic>>> fetchLostPetsWithStatus() async {
     try {
       final lostPets = await petService.fetchLostPets();
       final sightings = await fetchPetSightings();
 
-      // Excluir mascotas con avistamientos coincidentes
       final matchedDescriptions = sightings.map((sighting) => sighting['description']).toSet();
       final matchedUsers = sightings.map((sighting) => sighting['user']).toSet();
 
@@ -86,7 +80,6 @@ class PetFindService {
     }
   }
 
-  /// Obtener historial de avistamientos para una mascota perdida
   Future<List<Map<String, dynamic>>> fetchSightingsForLostPet(Map<String, dynamic> pet) async {
     try {
       final sightings = await fetchPetSightings();
@@ -94,7 +87,7 @@ class PetFindService {
         return sighting['description'] == pet['description'] &&
             sighting['user'] == pet['user'] &&
             sighting['species'] == pet['species'] &&
-            sighting['breed'] == pet['breed']; // Filtros adicionales
+            sighting['breed'] == pet['breed'];
       }).toList();
     } catch (e) {
       print('Error al obtener historial de avistamientos: $e');
@@ -102,44 +95,11 @@ class PetFindService {
     }
   }
 
-  /// Crear un nuevo avistamiento
-  Future<String> createPetSighting({
-    required int species,
-    required int breed,
-    required String color,
-    required String description,
-    required String dateSighted,
-    required String latitude,
-    required String longitude,
-  }) async {
-    try {
-      final token = await authService.getToken();
-
-      final response = await requestHandler.postRequest(
-        'post/pet-sightings/',
-        data: {
-          "species": species,
-          "breed": breed,
-          "color": color,
-          "description": description,
-          "date_sighted": dateSighted,
-          "latitude": latitude,
-          "longitude": longitude,
-        },
-        headers: {
-          'Authorization': 'Token $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response != null && response['id'] != null) {
-        return 'Avistamiento registrado exitosamente';
-      } else {
-        throw Exception('Error al registrar el avistamiento. Formato no válido.');
-      }
-    } catch (e) {
-      print('Error al registrar avistamiento: $e');
-      return 'Error al registrar avistamiento: ${e.toString()}';
+  String getRewardForPet(Map<String, dynamic> pet) {
+    if (pet['status'] == 'Perdido') {
+      return pet['reward_amount']?.toString() ?? '0.00';
+    } else {
+      return 'No aplica';
     }
   }
 }

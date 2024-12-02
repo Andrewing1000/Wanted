@@ -19,7 +19,6 @@ class _ManagerScreenState extends State<ManagerScreen> {
   bool _isEditingProfile = false;
   final PageController _pageController = PageController();
   final AuthService _authService = AuthService();
-  final GlobalKey<HomePageState> _homePageKey = GlobalKey<HomePageState>();
   String? userName;
 
   @override
@@ -40,10 +39,6 @@ class _ManagerScreenState extends State<ManagerScreen> {
       _currentIndex = index;
       _isEditingProfile = false;
       _pageController.jumpToPage(index);
-
-      if (index == 0) {
-        _homePageKey.currentState?.fetchLostPets();
-      }
     });
   }
 
@@ -78,14 +73,10 @@ class _ManagerScreenState extends State<ManagerScreen> {
         onPageChanged: (index) {
           setState(() {
             _currentIndex = index;
-
-            if (index == 0) {
-              _homePageKey.currentState?.fetchLostPets();
-            }
           });
         },
         children: [
-          HomePage(key: _homePageKey),
+          HomePage(),
           PetMePage(),
           PetFormScreen(),
           Center(child: Text('Avistamientos Creados')),

@@ -58,11 +58,7 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
   Future<void> _loadSightingsHistory() async {
     try {
       final petFindService = PetFindService();
-      final history = await petFindService.fetchSightingsForLostPet(
-        petId: widget.pet['id'],
-        description: widget.pet['description'],
-        user: widget.pet['user'],
-      );
+      final history = await petFindService.fetchSightingsForLostPet(widget.pet);
 
       setState(() {
         sightingsHistory = history;
