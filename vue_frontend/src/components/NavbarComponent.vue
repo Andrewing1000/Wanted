@@ -11,23 +11,13 @@
       <div v-if="isDrawerOpen" class="drawer-menu">
         <ul class="drawer-list">
           <li>
-            <router-link to="/config-user">
-              <i class="icon">⚙️ </i> Configuración
-            </router-link>
-          </li>
-          <li>
             <router-link to="/publish-user">
-              <i class="icon">📝 </i> Publicar
+              <i class="icon">📝 </i> Publicar avistamiento
             </router-link>
           </li>
           <li>
-            <router-link to="/sighting-user">
-              <i class="icon">🔍 </i> Avistamiento
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/saved-post-user">
-              <i class="icon">💾 </i> Publicaciones Guardadas
+            <router-link to="/blog-user">
+              <i class="icon">📝 </i> Publicaciones mascota perdida
             </router-link>
           </li>
         </ul>
@@ -53,13 +43,12 @@
     <ul v-if="isLoggedIn" class="navbar-links">
       <li><router-link to="/pets">Mascotas</router-link></li>
       <li><router-link to="/services-user">Servicios</router-link></li>
-      <li><router-link to="/blog-user">Blog</router-link></li>
+      <li><router-link to="/sighting-user">Avistamiento</router-link></li>
       <li><router-link to="/profile-user">Perfil</router-link></li>
     </ul>
 
     <!-- Información de usuario logueado -->
   <div v-if="isLoggedIn" class="user-info">
-    <span>{{ userName }}</span>
     <div class="user-icon" @click="toggleUserMenu">
       <img :src="userIcon" alt="User Icon" class="user-img" />
       <div v-if="showUserMenu" class="user-menu">

@@ -8,8 +8,8 @@
             type="text" 
             id="name" 
             v-model="user.name" 
-            placeholder="Ingrese su nombre completo" 
-            required
+            placeholder="Nombre completo" 
+            readonly
           />
         </div>
         <div class="form-group">
@@ -18,8 +18,8 @@
             type="email" 
             id="email" 
             v-model="user.email" 
-            placeholder="Ingrese su correo electrónico" 
-            required
+            placeholder="Correo electrónico" 
+            readonly
           />
         </div>
         <div class="form-group">
@@ -28,11 +28,10 @@
             type="text" 
             id="phone" 
             v-model="user.phone_number" 
-            placeholder="Ingrese su número de teléfono" 
-            required
+            placeholder="Teléfono" 
+            readonly
           />
         </div>
-        <button type="submit">Guardar Cambios</button>
       </form>
     </div>
   </template>
