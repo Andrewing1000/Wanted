@@ -73,7 +73,7 @@ class _PetSightingScreenState extends State<PetSightingScreen> {
       "breed": widget.pet['breed'],
       "color": widget.pet['color'],
       "description": widget.pet['description'],
-      "date_sighted": _selectedDate!.toIso8601String(),
+      "date_sighted": _selectedDate!.toIso8601String().split("T").first,
       "latitude": _selectedLocation!.latitude.toString(),
       "longitude": _selectedLocation!.longitude.toString(),
     };
@@ -104,6 +104,7 @@ class _PetSightingScreenState extends State<PetSightingScreen> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

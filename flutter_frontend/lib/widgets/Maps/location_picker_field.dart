@@ -96,13 +96,11 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Título de ubicación
         Text(
           "Ubicación",
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 8),
-        // Barra de búsqueda
         TextField(
           controller: _searchController,
           decoration: InputDecoration(
@@ -126,7 +124,6 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
             ),
           ),
         ),
-        // Resultados de búsqueda o mensaje de error
         if (_noResults)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
@@ -143,7 +140,7 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: ListView.builder(
-              shrinkWrap: true, // Ajustar al contenido
+              shrinkWrap: true,
               itemCount: _searchResults.length,
               itemBuilder: (context, index) {
                 final result = _searchResults[index];
@@ -156,7 +153,6 @@ class _LocationPickerFieldState extends State<LocationPickerField> {
             ),
           ),
         SizedBox(height: 8),
-        // Mapa interactivo
         Container(
           height: 200,
           decoration: BoxDecoration(

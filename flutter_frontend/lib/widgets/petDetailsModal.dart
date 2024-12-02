@@ -3,6 +3,7 @@ import 'package:latlong2/latlong.dart';
 import 'dart:async';
 import '../widgets/Maps/live_map.dart';
 import '../services/pet_service.dart';
+import '../views/PetSightingScreen.dart'; // Importar la pantalla de avistamientos
 
 class PetDetailsModal extends StatefulWidget {
   final Map<String, dynamic> pet;
@@ -92,11 +93,13 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
               children: [
                 Text(
                   'Especie: $speciesName',
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                  style:
+                  const TextStyle(fontSize: 16, color: Colors.white),
                 ),
                 Text(
                   'Raza: $breedName',
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                  style:
+                  const TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ],
             ),
@@ -105,9 +108,9 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
             // Color con barra de color
             Row(
               children: [
-                Text(
+                const Text(
                   'Color:',
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
                 const SizedBox(width: 8),
                 Container(
@@ -124,15 +127,18 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
             const SizedBox(height: 16),
 
             // Descripción
-            Text(
+            const Text(
               'Descripción:',
-              style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
             const SizedBox(height: 8),
             Text(
               widget.pet['description'] ?? 'Sin descripción',
-              style: const TextStyle(fontSize: 16, color: Colors.white),
+              style:
+              const TextStyle(fontSize: 16, color: Colors.white),
             ),
             const SizedBox(height: 16),
 
@@ -140,22 +146,26 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
             Text(
               'Fecha de pérdida: ${widget.pet['date_lost'] ?? 'Desconocida'}',
               style: const TextStyle(
-                  fontSize: 16, fontStyle: FontStyle.italic, color: Colors.white),
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.white),
             ),
             const SizedBox(height: 16),
 
             // Mapa
-            Text(
+            const Text(
               'Ubicación:',
-              style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
             const SizedBox(height: 8),
             SizedBox(
               height: 200,
               child: LiveMap(
                 coordinateStream: coordinateStream,
-                markerBuilder: (context, position) => Icon(
+                markerBuilder: (context, position) => const Icon(
                   Icons.pets,
                   color: Colors.blue,
                   size: 40,
@@ -175,7 +185,14 @@ class _PetDetailsModalState extends State<PetDetailsModal> {
                         borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: () {
-                    // Lógica para generar un avistamiento
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PetSightingScreen(
+                          pet: widget.pet,
+                        ),
+                      ),
+                    );
                   },
                   child: const Text(
                     "Generar Avistamiento",
