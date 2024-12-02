@@ -11,33 +11,21 @@ void main() async {
   //await perro();
   WidgetsFlutterBinding.ensureInitialized();
   await checkServerConnection();
+  AuthService res = AuthService();
+  res.Login('admin@example.com', 'admin');
+  final email = await res.getUserEmail();
+ final token = await res.getToken();
+ 
+ var raza=await reponse.getRequest('post/species/', headers: {
+   'Authorization': 'Token $token',
+   });
+
+ print(raza);
+
   //await Registro();
   runApp(MyApp());
 }
 
-Future<void> perro() async{
- final reponse = RequestHandler();
- final servidor = AuthService();
- servidor.Login('andres@hino.com', 'andres');
- final token = await servidor.getToken();
-
- var perro = reponse.postRequest('post/lost-pets/',
-   data: {
-     "pet_name": "tita",
-     "species": "albino",
-     "breed": "pequines",
-     "color": "blanco",
-    "description": "enano bonito",
-
-     "photo": null,
-     "date_lost": "2024-11-25",
-     "last_seen_location": "12,12",
-     "reward_amount": "400",
-   },
-   headers: {'Authorization': 'Token $token'},
- );
-
-}
 
 Future<void> checkServerConnection() async {
   final requestHandler = RequestHandler();
@@ -56,10 +44,10 @@ Future<void> Registro() async{
   try{
     var usuario = await request.postRequest('user/create/',
         data :{
-          "email": "mauricio@guti.com",
-          "password": "123",
-          "name": "mauricio",
-          "phone_number": "606060606",
+          "email": "andres@hino.com",
+          "password": "andres",
+          "name": "Andres Hino",
+          "phone_number": "7884262",
           "is_active": true,
           "is_staff": true,}
     );

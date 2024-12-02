@@ -20,7 +20,7 @@ from django.core.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
 from PIL import Image
-
+import math
 
 class BreedViewSet(viewsets.ModelViewSet): 
     "Viewset for pet breeds."
@@ -62,9 +62,78 @@ class LostPetPostViewSet(viewsets.ModelViewSet):
             return PetPhotoSerializer
         return super().get_serializer_class()
 
-    # @action(methods=['GET'], detail=False, url_path='near')
-    # def find_near(self, request, pk=None):
-    #     id_coordinates = LostPetPost.objects.values_list()
+    @action(methods=['GET'], detail=False, url_path='near')
+    def find_near(self, request, pk=None):
+        
+        query_lat = request.query_params.get('center_latitude', None)
+        query_lon = request.query_params.get('center_longitude', None)
+        radius = request.query_params.get('radius', None)
+        
+        fail = False
+        error = {'center_latitude': [], 'center_longitude': [], 'radius': []}
+        if not query_lat:
+            fail = True
+            error['center_latitude'].append('Missing')    
+        if not query_lon:
+            fail = True
+            error['center_longitude'].append('Missing')  
+        if not radius:
+            fail = True
+            error['radius'].append('Missing')  
+
+        try:
+            query_lat = float(query_lat)
+            if not isinstance(query_lat, float) or query_lat<-90 or query_lat>90:
+                fail = True
+                error['center_latitude'].append('Out of range')     
+        except:
+            if query_lat:
+                fail = True
+                error['center_latitude'].append('Not valid type')
+        
+        try: 
+            query_lon = float(query_lon)
+            if not isinstance(query_lon, float) or query_lon<-180 or query_lat>180:
+                fail = True
+                error['center_longitude'].append('Out of range')  
+        except:
+            if query_lon:
+                fail = True
+                error['center_longitude'].append('Not valid type') 
+        
+        try:
+            radius = float(radius)
+            if not isinstance(radius, float) or radius<0:
+                fail = True
+                error['radius'].append('Out of range') 
+        except:
+            if radius:
+                fail =True
+                error['radius'].append('Not valid type')
+        
+        if fail:
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
+        
+        query_lat, query_lon = map(math.radians, [query_lat, query_lon])
+        def earth_distance_to(id, latitude, longitude, earth_radius=6371.0):
+            latitude, longitude = map(math.radians, [latitude, longitude])
+            dlat = query_lat - latitude
+            dlon = query_lon - longitude
+            a = math.sin(dlat / 2)**2 + math.cos(latitude) * math.cos(query_lat) * math.sin(dlon / 2)**2
+            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+            distance = earth_radius * c
+            return distance
+
+        id_coordinates = LostPetPost.objects.values_list('id', 'latitude', 'longitude').order_by('id')
+        filtered_ids = []
+        for tuple in id_coordinates:
+            if earth_distance_to(*tuple) <=  radius + 1e-6:
+                filtered_ids.append(tuple[0])
+
+        return_data = LostPetPostSerializer(LostPetPost.objects.filter(id__in=filtered_ids), many=True).data
+        return Response(data=return_data, status=status.HTTP_200_OK)
+
 
     @action(methods=['POST', 'PUT', 'PATCH'], detail=True, url_path='photos/upload')
     def upload_photo(self, request, pk=None):
@@ -94,10 +163,6 @@ class LostPetPostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance = pet_photos, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-
-
 
 
 class PetSightingPostViewSet(viewsets.ModelViewSet):
@@ -161,6 +226,80 @@ class PetSightingPostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance=pet_photos, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @action(methods=['GET'], detail=False, url_path='near')
+    def find_near(self, request, pk=None):
+        
+        query_lat = request.query_params.get('center_latitude', None)
+        query_lon = request.query_params.get('center_longitude', None)
+        radius = request.query_params.get('radius', None)
+        
+        fail = False
+        error = {'center_latitude': [], 'center_longitude': [], 'radius': []}
+        if not query_lat:
+            fail = True
+            error['center_latitude'].append('Missing')    
+        if not query_lon:
+            fail = True
+            error['center_longitude'].append('Missing')  
+        if not radius:
+            fail = True
+            error['radius'].append('Missing')  
+
+        try:
+            query_lat = float(query_lat)
+            if not isinstance(query_lat, float) or query_lat<-90 or query_lat>90:
+                fail = True
+                error['center_latitude'].append('Out of range')     
+        except:
+            if query_lat:
+                fail = True
+                error['center_latitude'].append('Not valid type')
+        
+        try: 
+            query_lon = float(query_lon)
+            if not isinstance(query_lon, float) or query_lon<-180 or query_lat>180:
+                fail = True
+                error['center_longitude'].append('Out of range')  
+        except:
+            if query_lon:
+                fail = True
+                error['center_longitude'].append('Not valid type') 
+        
+        try:
+            radius = float(radius)
+            if not isinstance(radius, float) or radius<0:
+                fail = True
+                error['radius'].append('Out of range') 
+        except:
+            if radius:
+                fail =True
+                error['radius'].append('Not valid type')
+        
+        if fail:
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
+        
+        query_lat, query_lon = map(math.radians, [query_lat, query_lon])
+        def earth_distance_to(id, latitude, longitude, earth_radius=6371.0):
+            latitude, longitude = map(math.radians, [latitude, longitude])
+            dlat = query_lat - latitude
+            dlon = query_lon - longitude
+            a = math.sin(dlat / 2)**2 + math.cos(latitude) * math.cos(query_lat) * math.sin(dlon / 2)**2
+            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+            distance = earth_radius * c
+            return distance
+
+        id_coordinates = PetSightingPost.objects.values_list('id', 'latitude', 'longitude').order_by('id')
+        filtered_ids = []
+        for tuple in id_coordinates:
+            if earth_distance_to(*tuple) <=  radius + 1e-6:
+                filtered_ids.append(tuple[0])
+
+        return_data = PetSightingPostSerializer(PetSightingPost.objects.filter(id__in=filtered_ids), many=True).data
+        return Response(data=return_data, status=status.HTTP_200_OK)
+
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     """ViewSet for comments."""
