@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import '../model/RequestHandler.dart';
 import 'auth.dart';
 import 'dart:typed_data';

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mascotas_flutter/widgets/HIstorialModal.dart';
-import 'package:mascotas_flutter/widgets/petDetailsModal.dart';
+import 'package:mascotas_flutter/widgets/HistorialModal.dart';
 import 'package:mascotas_flutter/widgets/pet_card.dart';
-import '../services/petme_service.dart';
+import '../services/Historial_service.dart';
 
 class PetMePage extends StatefulWidget {
   @override
