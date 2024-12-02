@@ -202,7 +202,7 @@ class SightingCard extends StatelessWidget {
             title: Text(
               data['description'] != null
                   ? 'Descripcion: ${data['description']}'
-              
+
                   : 'Sin Descripcion',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
