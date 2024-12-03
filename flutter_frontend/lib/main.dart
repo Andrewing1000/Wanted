@@ -13,21 +13,21 @@ void main() async {
   await checkServerConnection();
   AuthService res = AuthService();
   final reponse = RequestHandler();
-  /*
+/*
   res.Login('admin@example.com', 'admin');
   final email = await res.getUserEmail();
   final token = await res.getToken();
   var raza=await reponse.postRequest('post/species/',
       data:{
-        "value": "DATA DUMMY",
+        "value": "Perro",
       },
       headers: {
         'Authorization': 'Token $token',
       });
 
-  var popo=await reponse.postRequest('post/breeds/',
+  var especie=await reponse.postRequest('post/breeds/',
       data:{
-        "value": "DATA DUMMY 2",
+        "value": "Labrador",
       },
       headers: {
         'Authorization': 'Token $token',
