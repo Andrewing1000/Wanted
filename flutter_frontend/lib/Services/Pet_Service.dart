@@ -162,7 +162,7 @@ class Mascotas {
 
 
       if (response != null && response['photo'] != null) {
-        return 'Foto subida exitosamente';
+        return '';
       } else {
         throw Exception('Error al subir la foto. Formato no válido.');
       }

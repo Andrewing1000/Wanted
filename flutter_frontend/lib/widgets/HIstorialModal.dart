@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:mascotas_flutter/widgets/start_button.dart';
 import 'dart:async';
 //Servicios
 import '../services/pet_service.dart';
@@ -11,7 +12,6 @@ import '../widgets/form_widgets/PickerColor.dart';
 import '../widgets/text_input_field.dart';
 import '../widgets/form_widgets/description_input_field.dart';
 import '../widgets/form_widgets/date_picker.dart';
-
 
 class HistorialModal extends StatefulWidget {
   final Map<String, dynamic> pet;
@@ -45,11 +45,9 @@ class _HistorialModalState extends State<HistorialModal> {
 
   Future<void> _loadPetDetails() async {
     try {
-      // Cargar las listas de razas y especies desde el servicio
       final breeds = await petService.fetchBreeds();
       final species = await petService.fetchSpecies();
 
-      // Configurar datos iniciales en los campos
       setState(() {
         _nameController.text = widget.pet['pet_name'] ?? '';
         _selectedBreedId = widget.pet['breed'];
@@ -92,11 +90,9 @@ class _HistorialModalState extends State<HistorialModal> {
         SnackBar(content: Text('Guardando cambios...')),
       );
 
-      // Formatear la fecha
       final String formattedDate =
           '${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}';
 
-      // Llamar al servicio para actualizar la mascota
       try {
         final response = await petService.updatePet(
           petId: widget.pet['id'],
@@ -105,19 +101,17 @@ class _HistorialModalState extends State<HistorialModal> {
           breed: _selectedBreedId!,
           color: _colorController.text.trim(),
           description: _descriptionController.text.trim(),
-          photo: null, // Imagen no implementada
+          photo: null,
           dateLost: formattedDate,
           lat: _selectedLocation!.latitude.toString(),
           long: _selectedLocation!.longitude.toString(),
           rewardAmount: _rewardController.text.trim(),
         );
 
-
-        // Mostrar mensaje de éxito
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Cambios guardados: $response')),
         );
-        Navigator.pop(context); // Cerrar el modal
+        Navigator.pop(context);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al guardar los cambios: $e')),
@@ -127,6 +121,44 @@ class _HistorialModalState extends State<HistorialModal> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Por favor, completa todos los campos.')),
       );
+    }
+  }
+
+  Future<void> _eliminarDato() async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Eliminación'),
+          content: const Text('¿Estás seguro de que deseas eliminar este dato? Esta acción no se puede deshacer.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      try {
+        final response = await petService.deleteLostPet(widget.pet['id']);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Eliminado con éxito')),
+        );
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al eliminar: $e')),
+        );
+      }
     }
   }
 
@@ -185,7 +217,7 @@ class _HistorialModalState extends State<HistorialModal> {
                   controller: _rewardController,
                 ),
                 const SizedBox(height: 16),
-                Text("Fecha de Extravio"),
+                const Text("Fecha de Extravio"),
                 const SizedBox(height: 8),
                 DatePickerField(
                   selectedDate: _selectedDate,
@@ -196,7 +228,7 @@ class _HistorialModalState extends State<HistorialModal> {
                   controller: _descriptionController,
                 ),
                 const SizedBox(height: 16),
-                Text("Ubicación"),
+                const Text("Ubicación"),
                 const SizedBox(height: 8),
                 SizedBox(
                   height: 200,
@@ -210,25 +242,28 @@ class _HistorialModalState extends State<HistorialModal> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    StartButton(onPressed: _saveChanges, text: 'Guardar'),
+                    const SizedBox(height: 8),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.greenAccent.withOpacity(0.8),
+                        backgroundColor: Colors.redAccent.withOpacity(0.8),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      onPressed: _saveChanges,
+                      onPressed: _eliminarDato,
                       child: const Text(
-                        "Guardar Cambios",
+                        "Eliminar",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
+                    const SizedBox(height: 8),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent.withOpacity(0.8),
+                        backgroundColor: Colors.grey,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
