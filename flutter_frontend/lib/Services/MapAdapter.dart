@@ -9,6 +9,7 @@ class MapAdapter extends StatefulWidget {
   final Function(double latitude, double longitude, double zoom)? onCameraIdle;
   final Map<String, dynamic>? initialCameraPosition;
   final double height;
+  final VoidCallback? onMapReady; // Añadido
 
   const MapAdapter({
     Key? key,
@@ -19,6 +20,7 @@ class MapAdapter extends StatefulWidget {
     this.onCameraIdle,
     this.initialCameraPosition,
     this.height = 400.0,
+    this.onMapReady, // Añadido
   }) : super(key: key);
 
   @override
@@ -66,6 +68,11 @@ class MapAdapterState extends State<MapAdapter> {
     _platformChannel = MethodChannel('com.example.map_adapter_$id');
     _platformChannel.setMethodCallHandler(_handleMethodCall);
     widget.controller._setMethodChannel(_platformChannel);
+
+    // Llamar al callback onMapReady si está definido
+    if (widget.onMapReady != null) {
+      widget.onMapReady!();
+    }
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
@@ -100,6 +107,9 @@ class MapAdapterState extends State<MapAdapter> {
     }
   }
 }
+
+// Resto del MapAdapterController sin cambios
+
 
 class MapAdapterController {
   MethodChannel? _platformChannel;

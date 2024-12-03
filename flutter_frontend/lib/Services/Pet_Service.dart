@@ -7,6 +7,7 @@ import 'dart:typed_data';
 class Mascotas {
   final RequestHandler requestHandler = RequestHandler();
   final AuthService Auth = AuthService();
+  
   Future<List<Map<String, dynamic>>> fetchLostPets() async {
     try {
       final token = await Auth.getToken();
@@ -148,5 +149,53 @@ class Mascotas {
       return [];
     }
   }
+
+
+  Future<List<String>> fetchPetSightingPhotos({required int id}) async {
+    try {
+      final token = await Auth.getToken();
+      final response = await requestHandler.getRequest(
+        'post/pet-sightings/$id/photos/',
+        headers: {'Authorization': 'Token $token'},
+      );
+
+      if (response is List) {
+        // Mapea las URLs de las fotos
+        return response
+            .map((item) => item['photo']?.toString() ?? '')
+            .where((url) => url.isNotEmpty)
+            .toList();
+      } else {
+        throw Exception('Formato de respuesta no válido para pet sightings photos.');
+      }
+    } catch (e) {
+      print('Error al obtener pet sightings photos: $e');
+      return [];
+    }
+  }
+
+  Future<List<String>> fetchLostPetPhotos({required int id}) async {
+    try {
+      final token = await Auth.getToken();
+      final response = await requestHandler.getRequest(
+        'post/lost-pets/$id/photos/',
+        headers: {'Authorization': 'Token $token'},
+      );
+
+      if (response is List) {
+        // Mapea las URLs de las fotos
+        return response
+            .map((item) => item['photo']?.toString() ?? '')
+            .where((url) => url.isNotEmpty)
+            .toList();
+      } else {
+        throw Exception('Formato de respuesta no válido para lost pets photos.');
+      }
+    } catch (e) {
+      print('Error al obtener lost pets photos: $e');
+      return [];
+    }
+  }
+
 
 }

@@ -11,8 +11,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
-
-
   late TabController _tabController;
   final Mascotas _petService = Mascotas();
 
@@ -44,12 +42,44 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       _isLoading = true;
     });
 
-    final data = await _petService.fetchLostPets();
-    setState(() {
-      petData = data;
-      filteredPetData = List.from(data);
-      _isLoading = false; // Termina la carga
-    });
+    try {
+      final data = await _petService.fetchLostPets();
+
+      // Crear una lista de futuras solicitudes para obtener las fotos
+      List<Future<void>> fetchPhotoFutures = [];
+
+      for (var pet in data) {
+        final petId = pet['id'];
+        if (petId != null) {
+          // Añadir cada futura solicitud a la lista
+          fetchPhotoFutures.add(_petService.fetchLostPetPhotos(id: petId).then((urls) {
+            pet['photos'] = urls; // Añadir la lista de URLs al diccionario de la publicación
+            print('Pet ID: $petId, Photos: $urls'); // Depuración
+          }).catchError((e) {
+            pet['photos'] = []; // En caso de error, asignar una lista vacía
+            print('Error fetching photos for Pet ID: $petId, Error: $e');
+          }));
+        } else {
+          pet['photos'] = []; // Publicación sin fotos
+        }
+      }
+
+      // Esperar a que todas las solicitudes de fotos se completen
+      await Future.wait(fetchPhotoFutures);
+
+      setState(() {
+        petData = data;
+        filteredPetData = List.from(data);
+        _isLoading = false; // Termina la carga
+      });
+    } catch (e) {
+      print('Error fetching pets: $e');
+      setState(() {
+        _isLoading = false;
+        petData = [];
+        filteredPetData = [];
+      });
+    }
   }
 
   void _filterPets() {
@@ -59,12 +89,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           filteredPetData = List.from(petData);
           break;
         case 1:
-          filteredPetData =
-              petData.where((pet) => pet['status'] == 'Perdido').toList();
+          filteredPetData = petData.where((pet) => pet['status'] == 'Perdido').toList();
           break;
         case 2:
-          filteredPetData =
-              petData.where((pet) => pet['status'] == 'Visto').toList();
+          filteredPetData = petData.where((pet) => pet['status'] == 'Visto').toList();
           break;
       }
     });
@@ -78,7 +106,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -98,42 +125,50 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             child: _isLoading
                 ? Center(child: CircularProgressIndicator())
                 : RefreshIndicator(
-              onRefresh: _fetchPets, // Refrescar los datos
-              child: petData.isEmpty
-                  ? ListView(
-                // Necesario para usar RefreshIndicator con contenido vacío
-                children: [
-                  Center(
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 100),
-                      child: Text(
-                        "No hay información disponible.",
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                    ),
+                    onRefresh: _fetchPets, // Refrescar los datos
+                    child: filteredPetData.isEmpty
+                        ? ListView(
+                            // Necesario para usar RefreshIndicator con contenido vacío
+                            children: [
+                              Center(
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: 100),
+                                  child: Text(
+                                    "No hay información disponible.",
+                                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : GridView.builder(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.75,
+                            ),
+                            itemCount: filteredPetData.length,
+                            itemBuilder: (context, index) {
+                              final pet = filteredPetData[index];
+                              final photoList = pet['photos'] ?? [];
+                              final imageUrl = photoList.isNotEmpty ? photoList.first : 'assets/dummy.jpg';
+
+                              // Depuración: Imprimir la URL de la imagen
+                              print('Displaying image for Pet ID: ${pet['id']}, URL: $imageUrl');
+
+                              return PetCard(
+                                username: pet['user'] ?? 'Usuario desconocido',
+                                petName: pet['pet_name'] ?? 'Autor desconocido',
+                                status: pet['status'] ?? 'Desconocido', // Asegurarse de usar el estado real
+                                imageUrl: imageUrl,
+                                dateLost: pet['date_lost'] ?? 'Fecha desconocida',
+                                rewardAmount: pet['reward_amount'] != null
+                                    ? pet['reward_amount'].toString()
+                                    : '0.00',
+                                onTap: () => showPetDetailsModal(context, pet),
+                              );
+                            },
+                          ),
                   ),
-                ],
-              )
-                  : GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                ),
-                itemCount: filteredPetData.length,
-                itemBuilder: (context, index) {
-                  final pet = filteredPetData[index];
-                  return PetCard(
-                    username: pet['user'] ?? 'Usuario desconocido',
-                    petName: pet['pet_name'] ?? 'Autor desconocido',
-                    status: 'Perdido',
-                    imageUrl: pet['photo'] ?? 'assets/dummy.jpg',
-                    dateLost: pet['date_lost'] ?? 'Fecha desconocida',
-                    rewardAmount: pet['reward_amount'] ?? '0.00',
-                    onTap: () => showPetDetailsModal(context, pet),
-                  );
-                },
-              ),
-            ),
           ),
         ],
       ),
