@@ -3,6 +3,7 @@ import 'package:mascotas_flutter/widgets/Logo.dart';
 import 'widgets/titles.dart';
 import 'widgets/start_button.dart';
 import 'login.dart';
+import 'test_map.dart';
 import 'Services/MapAdapter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -65,7 +66,7 @@ class WelcomeScreenState extends State<WelcomeScreen>{
                   Navigator.push(
                     context,
                     PageRouteBuilder(
-                      pageBuilder: (_, __, ___) => LoginScreen(),
+                      pageBuilder: (_, __, ___) => CreateMarkerPage(mapController: MapAdapterController(),),
                       transitionsBuilder: (_, anim, __, child) {
                         return FadeTransition(opacity: anim, child: child);
                       },
