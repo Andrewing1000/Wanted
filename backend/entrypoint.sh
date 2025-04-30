@@ -1,16 +1,15 @@
 #!/bin/sh
-# entrypoint.sh
 
-# 1) Espera a que la DB esté lista
+# Espera a la base de datos
 python manage.py wait_for_db
 
-# 2) Aplica migraciones
+# Ejecuta migraciones
 python manage.py migrate --noinput
 
-# 3) (Opcional) recolecta estáticos si es modo prod
+# En producción, recolecta estáticos
 if [ "$DEV" = "false" ]; then
   python manage.py collectstatic --noinput
 fi
 
-# 4) Arranca el servidor en el puerto de la APP
+# Finalmente, ejecuta el CMD del contenedor (runserver u otro)
 exec "$@"
