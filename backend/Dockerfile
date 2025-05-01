@@ -6,6 +6,8 @@ COPY ./requirements.txt /tmp/requirements.txt
 COPY ./requirements.dev.txt /tmp/requirements.dev.txt
 COPY ./app /app
 COPY entrypoint.sh /entrypoint.sh
+
+# Asegura permiso de ejecución al entrypoint
 RUN chmod +x /entrypoint.sh
 
 WORKDIR /app

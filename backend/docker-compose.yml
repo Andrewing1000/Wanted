@@ -9,8 +9,8 @@ services:
       - "8081:8080"    # Jenkins UI en el host:8081 → contenedor:8080
       - "50000:50000"  # para agentes remotos (opcional)
     volumes:
-      - jenkins_home:/var/jenkins_home   # persiste config, jobs, plugins :contentReference[oaicite:0]{index=0}
-      - /var/run/docker.sock:/var/run/docker.sock  # para que Jenkins controle Docker :contentReference[oaicite:1]{index=1}
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
 
   # ————— Django app —————
   app:
@@ -30,7 +30,6 @@ services:
       - DB_PASS=changeme
     depends_on:
       - db
-      - jenkins   # opcional: espera que Jenkins esté arriba (no bloquea ejecución)
     command: >
       sh -c "python manage.py wait_for_db &&
              python manage.py migrate &&
@@ -45,6 +44,7 @@ services:
       - POSTGRES_DB=devdb
       - POSTGRES_USER=devuser
       - POSTGRES_PASSWORD=changeme
+      - POSTGRES_HOST_AUTH_METHOD=trust
 
 volumes:
   jenkins_home:
