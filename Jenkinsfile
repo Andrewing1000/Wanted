@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    environment {
+        // Nombre de proyecto Docker Compose (opcional)
+        COMPOSE_PROJECT = "wanted_ci"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Andrewing1000/Wanted.git', branch: 'main'
+            }
+        }
+
+        stage('Build Docker images') {
+            steps {
+                // Cambia al directorio backend antes de invocar Docker Compose
+                dir('backend') {
+                    sh 'docker-compose build --parallel'
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                dir('backend') {
+                    // Levanta sólo la base de datos y ejecuta los tests dentro del contenedor app
+                    sh '''
+                      docker-compose up -d db
+                      docker-compose run --rm app python manage.py test
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy (dev)') {
+            when {
+                branch 'main'
+            }
+            steps {
+                dir('backend') {
+                    // Recreate actualiza la imagen y levanta app+db
+                    sh 'docker-compose up -d'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completado correctamente.'
+        }
+        failure {
+            echo 'Fallo en alguna etapa del pipeline.'
+        }
+    }
+}

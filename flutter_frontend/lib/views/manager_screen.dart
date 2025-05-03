@@ -1,7 +1,14 @@
-// lib/views/manager_screen.dart
 import 'package:flutter/material.dart';
+import 'package:mascotas_flutter/views/Pet_me.dart';
+import '../login.dart';
+import '../Services/auth.dart';
 import 'home_page.dart';
 import 'form_page.dart';
+import '../widgets/manage_screen_widgets/main_app_bar.dart';
+import '../widgets/manage_screen_widgets/bottom_naviagation_bar.dart';
+import 'testing/test_widgets.dart';
+import 'UserMe/VIewProfileScreen.dart';
+import 'UserMe/UserMe.dart'; // Pantalla para editar datos
 
 class ManagerScreen extends StatefulWidget {
   @override
@@ -9,23 +16,40 @@ class ManagerScreen extends StatefulWidget {
 }
 
 class _ManagerScreenState extends State<ManagerScreen> {
-  int _currentIndex = 0;
-  PageController _pageController = PageController();
+  int _currentIndex = 0; // Índice de la página actual
+  bool _isEditingProfile = false; // Bandera para alternar entre vista y edición
+  final PageController _pageController =
+      PageController(); // Controlador de páginas
+  final AuthService _authService = AuthService();
+  String? userName;
 
-  final List<Widget> _pages = [
-    HomePage(), // Página de inicio
-    Center(child: Text('Guardados')), // Página de Guardados
-    PetFormScreen(), // Página de Crear Anuncio
-    Center(
-        child:
-            Text('Avistamientos Creados')), // Página de Avistamientos Creados
-    Center(child: Text('Usuario')), // Página de Usuario
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
 
+  /// Cargar el nombre del usuario
+  Future<void> _loadUserName() async {
+    final name = await _authService.getUserName();
+    setState(() {
+      userName = name ?? 'Usuario';
+    });
+  }
+
+  /// Cambiar a la página seleccionada
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
-      _pageController.jumpToPage(index);
+      _isEditingProfile =
+          false; // Salir del modo de edición al cambiar de página
+    });
+  }
+
+  /// Alternar entre modo de vista y edición
+  void _toggleEditMode() {
+    setState(() {
+      _isEditingProfile = !_isEditingProfile;
     });
   }
 
@@ -38,49 +62,33 @@ class _ManagerScreenState extends State<ManagerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Find You\'re Pet, go!'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications),
-            onPressed: () {
-              // Acciones de notificación
-            },
-          ),
+      appBar: MainAppBar(
+        title: 'Find You\'re Pet, go!',
+        userName: userName,
+        onLogout: () async {
+          await _authService.logout();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+          );
+        },
+      ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          HomePage(),
+          PetMePage(),
+          //favoritos();
+          PetFormScreen(),
+          Center(child: Text('Avistamientos Creados')),
+          _isEditingProfile
+              ? ForMeScreen() // Pantalla de edición
+              : ViewProfileScreen(onEdit: _toggleEditMode), // Pantalla de vista
         ],
       ),
-      body: PageView(
-        controller: _pageController,
-        physics: NeverScrollableScrollPhysics(), // Evita el swipe entre páginas
-        children: _pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: _onItemTapped,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Guardados',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_box),
-            label: 'Crear Anuncio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Avistamientos Creados',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Usuario',
-          ),
-        ],
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
+        onItemTapped: _onItemTapped,
       ),
     );
   }

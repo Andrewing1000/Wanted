@@ -10,17 +10,15 @@ from rest_framework import pagination
 from rest_framework import status
 
 from django.contrib.auth.models import AnonymousUser
-from core.models import Session
 from core.permissions import IsLogged
 from core.utils import LogInThrottle
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout, login
 
 from user.serializers import (
     AuthTokenSerializer,
     UserSerializer,
     ManageUserSerializer,
-    SessionSerializer,
     HealthCheckSerializer,
 )
 
@@ -76,45 +74,12 @@ class ListUsersView(generics.ListAPIView):
     ])
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-
-
-class ListUserLogsView(generics.ListAPIView):
-    """List shows user logs in the api"""
-    serializer_class = SessionSerializer
-    #permission_classes = [HasRole([Role.get_admin()]), IsLogged]
-    #pagination_class = LogListPagination
-    queryset = Session.objects.all()
-
-    def get_queryset(self):
-
-        email = self.request.query_params.get('email', None)
-        queryset = self.queryset
-        # Filter queryset based on the 'admin' parameter
-        if not email:
-            raise MissingQueryParameterException(detail="Se debe especificar el parámetro de email.")
-
-        email = get_user_model().objects.normalize_email(email)
-        user = get_object_or_404(get_user_model(), email = email)
-
-        queryset = queryset.filter(user = user)
-
-        return queryset
-
-    @extend_schema(parameters=[
-        OpenApiParameter(
-            name='email',
-            description="Email from which user log is going to be returned.",
-            required=True,
-            type=OpenApiTypes.STR
-        )
-    ])
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
     
 
 class CreateTokenView(ObtainAuthToken):
     """Create a new auth toker for user."""
     #throttle_classes = [LogInThrottle]
+    authentication_classes = []
     serializer_class = AuthTokenSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
@@ -129,25 +94,13 @@ class CreateTokenView(ObtainAuthToken):
         if(isinstance(user, AnonymousUser)):
             return Response({'message'  : 'El usuario no está registrado'}, status= status.HTTP_404_NOT_FOUND)
 
+        login(request=request, user=user)
         response_serializer  = UserSerializer(instance = user)
         data = response_serializer.data
-        
         token, created = Token.objects.get_or_create(user=user)
-
-        if(hasattr(user, "iotclient")):
-            user.iotclient.ip = self.get_client_ip(request)
-            user.iotclient.save()
-            
         data['token'] = token.key
         return Response(data = data, status=status.HTTP_200_OK)
 
-    def get_client_ip(self, request):
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0].strip()
-        else:
-            ip = request.META.get('REMOTE_ADDR')
-        return ip
 
 
 class LogoutView(views.APIView):
@@ -156,7 +109,7 @@ class LogoutView(views.APIView):
     def post(self, request, *args, **kwargs):
         if(isinstance(request.user, AnonymousUser)):
             return Response(status=status.HTTP_412_PRECONDITION_FAILED)
-        #Session.logout(request.user, request=request)
+        logout(request=request)
         return Response(status=status.HTTP_202_ACCEPTED)
 
 

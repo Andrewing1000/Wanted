@@ -1,14 +1,15 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:mascotas_flutter/views/manager_screen.dart';
 import 'package:mascotas_flutter/widgets/Logo.dart';
 import 'package:mascotas_flutter/widgets/text_input_password.dart';
-import 'model/auth.dart';
+import 'Services/auth.dart';
 import 'widgets/text_input_field.dart';
 import 'widgets/hyperlink_text.dart';
 import 'widgets/start_button.dart';
-import 'Services/RequestHandler.dart';
 import 'registro.dart';
+import 'Services/LoginMaure.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -23,7 +24,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isPasswordVisible=false;
 
   @override
   void initState() {
@@ -68,11 +68,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             child: SlideTransition(
               position: _slideAnimation,
               child: Container(
-                padding: EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
+                  boxShadow: const[
                     BoxShadow(
                       color: Colors.black12,
                       blurRadius: 8,
@@ -111,6 +111,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                       },
                     ),
+
+
                     SizedBox(height: 20),
                     TextInputField(
                       labelText: 'Ingrese su correo',
@@ -140,7 +142,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           );
                           return;
                         }
-                        var response = await LoginStart(correo, contrasenia);
+                        var auth = AuthService();
+                        var response = await auth.Login(correo,contrasenia);
                         if (response == false) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -148,15 +151,21 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
                           );
                         }else if(response == true){
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Inicio correcto de sessión.'),
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (_, __, ___) => ManagerScreen(),
+                              transitionsBuilder: (_, anim, __, child) {
+                                return FadeTransition(opacity: anim, child: child);
+                              },
                             ),
                           );
+
                         }
                       },
                     ),
                     SizedBox(height: 20),
+                  
                   ],
                 ),
               ),
