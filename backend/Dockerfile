@@ -5,6 +5,10 @@ ENV PYTHONUNBUFFERED 1
 COPY ./requirements.txt /tmp/requirements.txt
 COPY ./requirements.dev.txt /tmp/requirements.dev.txt
 COPY ./app /app
+COPY entrypoint.sh /entrypoint.sh
+
+# Asegura permiso de ejecución al entrypoint
+RUN chmod +x /entrypoint.sh
 
 WORKDIR /app
 EXPOSE 8080
@@ -29,3 +33,5 @@ RUN python -m venv /py && \
 ENV PATH="/py/bin:$PATH"
 USER django-user
 
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8080"]
