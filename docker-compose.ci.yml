@@ -1,14 +1,16 @@
+version: '3.8'
 services:
   jenkins:
-    image: jenkins/jenkins:lts
-    user: root
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: root                # para asegurar permisos sobre el socket
     ports:
       - "8081:8080"
       - "8082:50000"
     volumes:
       - jenkins-home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock   # talk to host daemon
-      - /usr/bin/docker:/usr/bin/docker     
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
 
 volumes:
