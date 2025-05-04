@@ -13,20 +13,24 @@ pipeline {
     stage('Build & Up') {
       steps {
         dir('backend') {
-          // note the space instead of dash
           sh 'docker compose up --build -d'
         }
       }
     }
+  stage('Migrate') {
+    steps {
+      dir('backend') {
 
-    stage('Migrate') {
-      steps {
-        dir('backend') {
-          sh 'docker compose run --rm wanted sh -c "python manage.py migrate"'
-        }
+        sh '''
+          docker compose run --rm -T wanted sh -c "
+            echo PWD_INSIDE=$(pwd);
+            ls -la /app
+          "
+        '''
+        sh 'docker compose run --rm -T wanted sh -c "python manage.py migrate"'
       }
     }
-
+  }
     stage('Unit Tests') {
       steps {
         dir('backend') {

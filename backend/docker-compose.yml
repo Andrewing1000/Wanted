@@ -6,6 +6,7 @@ services:
         - DEV=true
     ports:
       - "8080:8080"
+    working_dir: /app
     volumes:
       - ./app:/app
       - dev-static-data:/vol/web
