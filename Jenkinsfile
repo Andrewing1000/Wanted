@@ -7,7 +7,9 @@ pipeline {
 
   stages {
     stage('Checkout') {
-        git branch: 'jenkins', url: 'https://github.com/Andrewing1000/Wanted.git'
+        steps{
+            git branch: 'jenkins', url: 'https://github.com/Andrewing1000/Wanted.git'
+        }
     }
     stage('Build & Up') {
       steps {
