@@ -11,35 +11,34 @@ pipeline {
     }
 
     stage('Build & Up') {
-        steps {
-          dir('backend') {
-            sh 'docker compose up --build -d --wait'
-          }
+      steps {
+        dir('backend') {
+          sh 'docker compose up --build -d --wait'
         }
+      }
     }
 
     stage('Migrate') {
-        steps {
-          dir('backend') {
-            // ejecuta migrate dentro del contenedor "wanted" que ya está corriendo
-            sh 'docker compose exec -T wanted python manage.py migrate'
-          }
+      steps {
+        dir('backend') {
+          sh 'docker compose exec -T wanted python manage.py migrate'
         }
+      }
     }
 
     stage('Unit Tests') {
-        steps {
-          dir('backend') {
-            sh 'docker compose exec -T wanted python manage.py test post.tests'
-          }
-        }
-    }
-
-    post {
-      always {
+      steps {
         dir('backend') {
-          sh 'docker compose down --volumes'
+          sh 'docker compose exec -T wanted python manage.py test post.tests'
         }
+      }
+    }
+  }
+
+  post {
+    always {
+      dir('backend') {
+        sh 'docker compose down --volumes'
       }
     }
   }

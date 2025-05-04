@@ -20,12 +20,18 @@ services:
     image: postgres:13-alpine
     volumes:
       - dev-db-data:/var/lib/postgres/data
+      
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U ${DB_USER:-devuser}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     environment:
       - POSTGRES_DB=devdb
       - POSTGRES_USER=devuser
       - POSTGRES_PASSWORD=changeme
       - POSTGRES_HOST_AUTH_METHOD=trust
-      
+
 volumes:
   dev-db-data:
   dev-static-data:
