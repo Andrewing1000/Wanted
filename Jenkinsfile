@@ -1,32 +1,29 @@
-pipeline {
-  agent any
-
-  options {
-    skipDefaultCheckout()
+// Scripted Pipeline: full control over checkout
+node {
+  // 1) Clone your repo with credentials
+  stage('Checkout') {
+    git credentialsId: 'jenkins-github',
+        branch:        'jenkins',
+        url:           'https://github.com/Andrewing1000/Wanted.git'
   }
 
-  stages {
-    stage('Checkout') {
-      steps {
-        // Full clone of your branch using the stored PAT credential
-        git credentialsId: 'jenkins-github',
-            branch:        'jenkins',
-            url:           'https://github.com/Andrewing1000/Wanted.git'
-      }
-    }
-
-    stage('Build & Up') {
-      steps { sh 'docker-compose up --build -d' }
-    }
-    stage('Migrate') {
-      steps { sh 'docker-compose run --rm wanted sh -c "python manage.py migrate"' }
-    }
-    stage('Unit Tests') {
-      steps { sh 'docker-compose run --rm wanted sh -c "python manage.py test post.tests"' }
-    }
+  // 2) Build and start your Docker stack
+  stage('Build & Up') {
+    sh 'docker-compose up --build -d'
   }
 
-  post {
-    always { sh 'docker-compose down --volumes' }
+  // 3) Run migrations
+  stage('Migrate') {
+    sh 'docker-compose run --rm wanted sh -c "python manage.py migrate"'
+  }
+
+  // 4) Run unit tests
+  stage('Unit Tests') {
+    sh 'docker-compose run --rm wanted sh -c "python manage.py test post.tests"'
+  }
+
+  // 5) Tear down
+  stage('Cleanup') {
+    sh 'docker-compose down --volumes'
   }
 }
