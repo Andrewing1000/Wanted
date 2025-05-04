@@ -13,8 +13,7 @@ dopipeline {
     stage('Build & Up') {
       steps {
         dir('backend') {
-          // note the space instead of dash
-          sh 'docker compose up --build -d'
+          sh 'docker compose up --build -d --wait'
         }
       }
     }
@@ -22,7 +21,7 @@ dopipeline {
     stage('Migrate') {
       steps {
         dir('backend') {
-          sh 'docker compose run --rm wanted sh -c "python manage.py migrate"'
+          sh 'docker compose exec -T wanted python manage.py migrate'
         }
       }
     }
@@ -30,7 +29,8 @@ dopipeline {
     stage('Unit Tests') {
       steps {
         dir('backend') {
-          sh 'docker compose run --rm wanted sh -c "python manage.py test post.tests"'
+          sh 'docker compose exec -T wanted python manage.py test post.tests'
+          sh 'docker compose exec -T wanted python manage.py test user.tests'
         }
       }
     }
