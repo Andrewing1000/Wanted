@@ -1,0 +1,15 @@
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    user: root
+    ports:
+      - "8081:8080"
+      - "8082:50000"
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock   # talk to host daemon
+      - /usr/bin/docker:/usr/bin/docker     
+    restart: unless-stopped
+
+volumes:
+  jenkins-home:

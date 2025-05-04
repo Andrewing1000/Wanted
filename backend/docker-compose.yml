@@ -1,4 +1,4 @@
-version: "3.8"
+
 services:
   wanted:
     build:
@@ -11,7 +11,7 @@ services:
       - ./app:/app
       - dev-static-data:/vol/web
     environment:
-      - DB_HOST=db
+      - DB_HOST=db-wanted
       - DB_NAME=devdb
       - DB_USER=devuser
       - DB_PASS=changeme
@@ -29,7 +29,7 @@ services:
       - dev-db-data:/var/lib/postgres/data
     environment:
       - POSTGRES_DB=devdb
-      - POSTGRES_USER=devuser
+      - POSTGRES_USER=devuser 
       - POSTGRES_PASSWORD=changeme
       - POSTGRES_HOST_AUTH_METHOD=trust
 
