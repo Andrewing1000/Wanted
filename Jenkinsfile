@@ -1,9 +1,13 @@
 pipeline {
   agent any
 
+  options {
+    skipDefaultCheckout()
+  }
+
   stages {
     stage('Checkout') {
-      steps { checkout scm }
+        git branch: 'jenkins', url: 'https://github.com/Andrewing1000/Wanted.git'
     }
     stage('Build & Up') {
       steps {
