@@ -30,6 +30,7 @@ pipeline {
       steps {
         dir('backend') {
           sh 'docker compose exec -T wanted python manage.py test post.tests'
+          sh 'docker compose exec -T wanted python manage.py test user.tests'
         }
       }
     }
