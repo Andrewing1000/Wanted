@@ -1,31 +1,46 @@
-node {
-  stage('Checkout') {
-    git credentialsId: 'jenkins-github',
-        branch:        'jenkins',
-        url:           'https://github.com/Andrewing1000/Wanted.git'
-  }
+pipeline {
+  agent any
 
-  stage('Build & Up') {
-    dir('backend') {
-      sh 'docker-compose up --build -d'
+  stages {
+    stage('Checkout') {
+      steps {
+        git credentialsId: 'jenkins-github',
+            branch: 'jenkins',
+            url:    'https://github.com/Andrewing1000/Wanted.git'
+      }
+    }
+
+    stage('Build & Up') {
+      steps {
+        dir('backend') {
+          // note the space instead of dash
+          sh 'docker compose up --build -d'
+        }
+      }
+    }
+
+    stage('Migrate') {
+      steps {
+        dir('backend') {
+          sh 'docker compose run --rm wanted sh -c "python manage.py migrate"'
+        }
+      }
+    }
+
+    stage('Unit Tests') {
+      steps {
+        dir('backend') {
+          sh 'docker compose run --rm wanted sh -c "python manage.py test post.tests"'
+        }
+      }
     }
   }
 
-  stage('Migrate') {
-    dir('backend') {
-      sh 'docker-compose run --rm wanted sh -c "python manage.py migrate"'
-    }
-  }
-
-  stage('Unit Tests') {
-    dir('backend') {
-      sh 'docker-compose run --rm wanted sh -c "python manage.py test post.tests"'
-    }
-  }
-
-  stage('Cleanup') {
-    dir('backend') {
-      sh 'docker-compose down --volumes'
+  post {
+    always {
+      dir('backend') {
+        sh 'docker compose down --volumes'
+      }
     }
   }
 }
