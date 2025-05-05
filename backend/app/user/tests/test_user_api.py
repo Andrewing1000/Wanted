@@ -19,10 +19,7 @@ def create_user(**params):
 
 def create_admin(**params):
     """Crea y devuelve un usuario administrador."""
-    params.setdefault('is_staff', True)
-    params.setdefault('is_superuser', True)
-    return get_user_model().objects.create_user(**params)
-
+    return get_user_model().objects.create_superuser(**params)
 
 class PublicUserAPITests(APITestCase):
     """Tests de endpoints públicos (sin token)."""
@@ -47,6 +44,19 @@ class PublicUserAPITests(APITestCase):
         user = get_user_model().objects.get(email=payload['email'])
         self.assertTrue(user.check_password(payload['password']))
         self.assertNotIn('password', res.data)
+
+    def setUp(self):
+        self.client.force_authenticate(user=self.user)
+
+    def test_retrieve_profile_success(self):
+        res = self.client.get(ME_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, {
+            'name': self.user.name,
+            'email': self.user.email,
+            'is_active': True,
+            'is_staff': True,
+        })
 
     def test_create_user_duplicate_email(self):
         payload = {
