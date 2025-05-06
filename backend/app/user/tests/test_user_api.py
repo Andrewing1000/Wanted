@@ -19,7 +19,11 @@ def create_user(**params):
 
 def create_admin(**params):
     """Crea y devuelve un usuario administrador."""
-    return get_user_model().objects.create_superuser(**params)
+    user = get_user_model().objects.create_user(**params)
+    user.is_staff = True
+    user.is_superuser = True
+    user.save()
+    return user
 
 class PublicUserAPITests(APITestCase):
     """Tests de endpoints públicos (sin token)."""
