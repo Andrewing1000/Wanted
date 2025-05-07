@@ -1,6 +1,8 @@
 pipeline {
   agent any
-
+  triggers {
+    pollSCM('H/1 * * * *')
+  }
   stages {
     stage('Checkout') {
       steps {
@@ -10,10 +12,10 @@ pipeline {
       }
     }
 
-    stage('Build & Up') {
+    stage('Build') {
       steps {
         dir('backend') {
-          sh 'docker compose up --build -d --wait'
+          sh 'docker compose build'
         }
       }
     }
@@ -21,7 +23,7 @@ pipeline {
     stage('Migrate') {
       steps {
         dir('backend') {
-          sh 'docker compose exec -T wanted python manage.py migrate'
+          sh 'docker compose run --rm wanted python manage.py migrate'
         }
       }
     }
@@ -29,18 +31,26 @@ pipeline {
     stage('Unit Tests') {
       steps {
         dir('backend') {
-          sh 'docker compose exec -T wanted python manage.py test post.tests'
-          sh 'docker compose exec -T wanted python manage.py test user.tests'
+          sh 'docker compose run --rm wanted python manage.py test post.tests'
+        }
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        dir('backend') {
+          sh 'docker compose up -d'
         }
       }
     }
   }
 
-  post {
-    always {
-      dir('backend') {
-        sh 'docker compose down --volumes'
-      }
-    }
-  }
+    // post {
+  //   always {
+  //     dir('backend') {
+  //       sh 'docker compose up '
+  //     }
+  //   }
+  // }
 }
+
