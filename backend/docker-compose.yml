@@ -5,6 +5,8 @@ services:
       args:
         - DEV=true
     working_dir: /app
+    ports:
+      - "8080:8080"
     environment:
       - DB_HOST=wanted-db
       - DB_NAME=devdb
@@ -14,18 +16,20 @@ services:
       - wanted-db
     command: >
       sh -c "python manage.py wait_for_db &&
-             python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8080"
+            python manage.py migrate &&
+            uvicorn app.asgi:application --host 0.0.0.0 --port 8080 --reload"
   wanted-db:
     image: postgres:13-alpine
     volumes:
-      - dev-db-data:/var/lib/postgres/data
+      - dev-db-data:/var/lib/postgresql/data
       
     healthcheck:
-      test: ["CMD-SHELL","pg_isready -U ${DB_USER:-devuser}"]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s
       timeout: 5s
       retries: 5
+
+
     environment:
       - POSTGRES_DB=devdb
       - POSTGRES_USER=devuser
