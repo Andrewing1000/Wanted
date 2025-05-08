@@ -10,7 +10,7 @@ router.register(r'breeds', views.BreedViewSet, basename="breeds")
 router.register(r'species', views.SpeciesViewSet, basename='species')
 router.register(r'lost-pets', views.LostPetPostViewSet, basename='lost-pet-post')
 router.register(r'pet-sightings', views.PetSightingPostViewSet, basename='pet-sighting-post')
-router.register(r'comments', views.CommentViewSet, basename='comment')
+# router.register(r'comments', views.CommentViewSet, basename='comment')
 router.register(r'messages', views.MessageViewSet, basename='message')
 
 urlpatterns = [
